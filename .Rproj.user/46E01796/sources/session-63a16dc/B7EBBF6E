@@ -1,0 +1,26 @@
+{
+    "id": "B7EBBF6E",
+    "path": "~/Documents/GitHub/SpectralUnmix/R/spectral_unmix.R",
+    "project_path": "R/spectral_unmix.R",
+    "type": "r_source",
+    "hash": "1536248375",
+    "contents": "",
+    "dirty": false,
+    "created": 1772741916589.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "113,4",
+        "scrollLine": "100"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1772742225,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1772742225670,
+    "read_only": false,
+    "read_only_alternatives": []
+}

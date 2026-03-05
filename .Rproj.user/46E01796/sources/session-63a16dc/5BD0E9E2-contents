@@ -1,0 +1,27 @@
+Package: SpectralUnmix
+Type: Package
+Title: Spectral Unmixing Methods for Hyperspectral and IFU Data
+Version: 0.1.0
+Authors@R: 
+    person(
+      "Rafael", "S. de Souza",
+      email = "r.s.desouza@herts.ac.uk",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0001-7207-4584")
+    )
+Description: SpectralUnmix provides tools for spectral–spatial decomposition of
+    hyperspectral datasets and integral field spectroscopy (IFU) cubes.
+    The package implements spectral unmixing methods based on non-negative
+    matrix factorization and related models to decompose a spectral cube
+    into spatial abundance maps and spectral components.
+    Optional spectral regularization can be applied to encourage smooth
+    physically meaningful spectra.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    torch
+Suggests:
+    viridis,
+    ggplot2
+RoxygenNote: 7.3.3
