@@ -16,8 +16,8 @@ $$
 
 where
 
-- $$\(S_j(\lambda)\)$$ are **spectral components**
-- $$\(A_j(x,y)\)$$ are **spatial abundance maps**
+- $$S_j(\lambda)$$ are **spectral components**
+- $$A_j(x,y)$$ are **spatial abundance maps**
 
 In matrix form
 $X \approx AS$
