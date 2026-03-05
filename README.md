@@ -10,12 +10,11 @@ The package implements spectral unmixing methods that decompose a spectral cube 
 
 SpectralUnmix assumes a linear mixing model
 
-$
-X(x,y,\lambda) =
-\sum_{j=1}^{k}
-A_j(x,y)\,S_j(\lambda)
-$
+$$
+X(x,y,\lambda) = \sum_{j=1}^{k} A_j(x,y) S_j(\lambda)
+$$
 
+where
 where
 
 - \(S_j(\lambda)\) are **spectral components**
