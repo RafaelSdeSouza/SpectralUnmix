@@ -15,10 +15,9 @@ X(x,y,\lambda) = \sum_{j=1}^{k} A_j(x,y) S_j(\lambda)
 $$
 
 where
-where
 
-- \(S_j(\lambda)\) are **spectral components**
-- \(A_j(x,y)\) are **spatial abundance maps**
+- $$\(S_j(\lambda)\)$$ are **spectral components**
+- $$\(A_j(x,y)\)$$ are **spatial abundance maps**
 
 In matrix form
 $X \approx AS$
