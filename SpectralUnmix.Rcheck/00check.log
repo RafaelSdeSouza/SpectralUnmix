@@ -22,6 +22,7 @@
 * checking whether package ‘SpectralUnmix’ can be installed ... OK
 * checking installed package size ... OK
 * checking package directory ... OK
+* checking ‘build’ directory ... OK
 * checking DESCRIPTION meta-information ... OK
 * checking top-level files ... OK
 * checking for left-over files ... OK
@@ -47,16 +48,9 @@
 * checking Rd \usage sections ... OK
 * checking Rd contents ... OK
 * checking for unstated dependencies in examples ... OK
-* checking files in ‘vignettes’ ... WARNING
-Files in the 'vignettes' directory but no files in 'inst/doc':
-  ‘getting-started.Rmd’ ‘ifu-workflow.Rmd’
+* checking installed files from ‘inst/doc’ ... OK
+* checking files in ‘vignettes’ ... OK
 * checking examples ... OK
 * checking for unstated dependencies in vignettes ... OK
-* checking package vignettes ... WARNING
-Directory 'inst/doc' does not exist.
-Package vignettes without corresponding single PDF/HTML:
-  ‘getting-started.Rmd’
-  ‘ifu-workflow.Rmd’
-* checking re-building of vignette outputs ... OK
-* DONE
-Status: 2 WARNINGs
+* checking package vignettes ... OK
+* checking re-building of vignette outputs ...
