@@ -26,8 +26,12 @@
 #' @return A list with class \code{"spectral_unmix"} containing:
 #' \itemize{
 #'   \item \code{spatial}: abundance matrix with one column per component.
+#'   \item \code{abundance}: alias of \code{spatial}.
 #'   \item \code{spectra}: component spectra with one row per component.
+#'   \item \code{basis}: component spectra arranged as wavelength-by-component.
+#'   \item \code{coef}: component weights arranged as component-by-spaxel.
 #'   \item \code{reconstruction}: reconstructed matrix \eqn{AS}.
+#'   \item \code{fitted}: alias of \code{reconstruction}.
 #'   \item \code{loss}: objective history over the optimization.
 #'   \item \code{center}: centering values used during preprocessing, or
 #'     \code{FALSE}.
@@ -152,10 +156,18 @@ spectral_unmix <- function(x,
     }
   }
 
+  spatial <- as.matrix(A$detach()$cpu())
+  spectra <- as.matrix(S$detach()$cpu())
+  reconstruction <- spatial %*% spectra
+
   fit <- list(
-    spatial = as.matrix(A$detach()$cpu()),
-    spectra = as.matrix(S$detach()$cpu()),
-    reconstruction = as.matrix(A$detach()$cpu()) %*% as.matrix(S$detach()$cpu()),
+    spatial = spatial,
+    abundance = spatial,
+    spectra = spectra,
+    basis = t(spectra),
+    coef = t(spatial),
+    reconstruction = reconstruction,
+    fitted = reconstruction,
     loss = loss_history,
     center = if (is.null(cen)) FALSE else cen,
     scale = if (is.null(sc)) FALSE else sc,
@@ -434,6 +446,274 @@ print.spectral_unmix <- function(x, ...) {
   invisible(x)
 }
 
+#' Summarize a Spectral Unmixing Fit
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param ... Unused.
+#'
+#' @return A list with class \code{"summary.spectral_unmix"}.
+#' @examples
+#' fake <- list(
+#'   spatial = matrix(runif(12), 4, 3),
+#'   spectra = matrix(runif(15), 3, 5),
+#'   loss = c(3, 2, 1)
+#' )
+#' class(fake) <- "spectral_unmix"
+#' summary(fake)
+#' @export
+summary.spectral_unmix <- function(object, ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  summary_object <- list(
+    n_spaxels = nrow(object$spatial),
+    n_wave = ncol(object$spectra),
+    rank = nrow(object$spectra),
+    final_loss = utils::tail(object$loss, 1L),
+    n_iter = length(object$loss)
+  )
+
+  class(summary_object) <- "summary.spectral_unmix"
+  summary_object
+}
+
+#' @export
+print.summary.spectral_unmix <- function(x, ...) {
+  cat("SpectralUnmix summary\n")
+  cat(sprintf("  spaxels: %d\n", x$n_spaxels))
+  cat(sprintf("  wavelength channels: %d\n", x$n_wave))
+  cat(sprintf("  components: %d\n", x$rank))
+  cat(sprintf("  iterations: %d\n", x$n_iter))
+  cat(sprintf("  final loss: %.6f\n", x$final_loss))
+  invisible(x)
+}
+
+#' NMF-style Basis Matrix
+#'
+#' Returns the component spectra arranged as wavelength-by-component, similar to
+#' a basis matrix in NMF software interfaces.
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param ... Unused.
+#'
+#' @return A numeric matrix with wavelengths in rows and components in columns.
+#' @examples
+#' fake <- list(spectra = matrix(runif(15), 3, 5))
+#' class(fake) <- "spectral_unmix"
+#' basis(fake)
+#' @export
+basis <- function(object, ...) {
+  UseMethod("basis")
+}
+
+#' @export
+basis.spectral_unmix <- function(object, ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  t(object$spectra)
+}
+
+#' Extract Abundance Coefficients
+#'
+#' Returns the component weights arranged as component-by-spaxel, similar to the
+#' coefficient matrix used by NMF interfaces.
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param ... Unused.
+#'
+#' @return A numeric matrix with components in rows and spaxels in columns.
+#' @examples
+#' fake <- list(spatial = matrix(runif(12), 4, 3))
+#' class(fake) <- "spectral_unmix"
+#' coef(fake)
+#' @export
+coef.spectral_unmix <- function(object, ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  t(object$spatial)
+}
+
+#' Return the Fitted Reconstruction
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param nx Optional x-axis size for cube output.
+#' @param ny Optional y-axis size for cube output.
+#' @param ... Unused.
+#'
+#' @return A numeric matrix, or a numeric cube when \code{nx} and \code{ny} are
+#' supplied.
+#' @examples
+#' fake <- list(reconstruction = matrix(runif(20), 4, 5))
+#' class(fake) <- "spectral_unmix"
+#' fitted(fake)
+#' @export
+fitted.spectral_unmix <- function(object, nx = NULL, ny = NULL, ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  if (is.null(nx) && is.null(ny)) {
+    return(object$reconstruction)
+  }
+  if (is.null(nx) || is.null(ny)) {
+    stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
+  }
+
+  matrix_to_cube(object$reconstruction, nx = nx, ny = ny)
+}
+
+#' Compute Residuals
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param x Numeric matrix originally used for the fit.
+#' @param nx Optional x-axis size for cube output.
+#' @param ny Optional y-axis size for cube output.
+#' @param ... Unused.
+#'
+#' @return A numeric matrix, or a numeric cube when \code{nx} and \code{ny} are
+#' supplied.
+#' @examples
+#' fake <- list(reconstruction = matrix(runif(20), 4, 5))
+#' class(fake) <- "spectral_unmix"
+#' x <- matrix(runif(20), 4, 5)
+#' residuals(fake, x = x)
+#' @export
+residuals.spectral_unmix <- function(object, x, nx = NULL, ny = NULL, ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  x <- validate_input_matrix(x)
+  residual <- x - object$reconstruction
+
+  if (is.null(nx) && is.null(ny)) {
+    return(residual)
+  }
+  if (is.null(nx) || is.null(ny)) {
+    stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
+  }
+
+  matrix_to_cube(residual, nx = nx, ny = ny)
+}
+
+#' Predict From a Fitted Spectral Unmixing Model
+#'
+#' Uses the fitted component spectra to estimate abundance weights for new data,
+#' or returns the in-sample reconstruction when \code{newdata} is omitted.
+#'
+#' @param object Result from [spectral_unmix()].
+#' @param newdata Optional new matrix or cube.
+#' @param type Prediction target: \code{"reconstruction"}, \code{"spatial"},
+#'   or \code{"cube"}.
+#' @param nx Optional x-axis size for cube output.
+#' @param ny Optional y-axis size for cube output.
+#' @param lr Learning rate used when estimating abundance weights for new data.
+#' @param niter Number of optimization iterations for new data.
+#' @param cuda Logical; if \code{TRUE}, request CUDA execution.
+#' @param verbose Logical; if \code{TRUE}, emit progress every 100 iterations.
+#' @param ... Unused.
+#'
+#' @return A numeric matrix or cube, depending on \code{type}.
+#' @examples
+#' \dontrun{
+#' demo <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+#' fit <- spectral_unmix(demo$matrix, k = 3, niter = 50)
+#' fitted_x <- predict(fit)
+#' new_weights <- predict(fit, newdata = demo$cube, type = "spatial")
+#' }
+#' @export
+predict.spectral_unmix <- function(object,
+                                   newdata = NULL,
+                                   type = c("reconstruction", "spatial", "cube"),
+                                   nx = NULL,
+                                   ny = NULL,
+                                   lr = 0.05,
+                                   niter = 500,
+                                   cuda = FALSE,
+                                   verbose = FALSE,
+                                   ...) {
+  if (!inherits(object, "spectral_unmix")) {
+    stop("'object' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  type <- match.arg(type)
+
+  if (is.null(newdata)) {
+    if (type == "spatial") {
+      return(object$spatial)
+    }
+    if (type == "reconstruction") {
+      return(object$reconstruction)
+    }
+    if (is.null(nx) || is.null(ny)) {
+      stop("'nx' and 'ny' are required when type = 'cube'.", call. = FALSE)
+    }
+    return(matrix_to_cube(object$reconstruction, nx = nx, ny = ny))
+  }
+
+  cube_dims <- infer_cube_dims(newdata)
+  if (!is.null(cube_dims)) {
+    nx <- cube_dims[1L]
+    ny <- cube_dims[2L]
+    newdata <- cube_to_matrix(newdata)
+  }
+
+  if (!requireNamespace("torch", quietly = TRUE)) {
+    stop("The 'torch' package must be installed to use predict().", call. = FALSE)
+  }
+
+  newdata <- validate_input_matrix(newdata)
+  if (ncol(newdata) != ncol(object$spectra)) {
+    stop("newdata must have the same number of columns as the fitted spectra.", call. = FALSE)
+  }
+  if (!is.numeric(lr) || length(lr) != 1L || is.na(lr) || lr <= 0) {
+    stop("'lr' must be a positive number.", call. = FALSE)
+  }
+  if (!is.numeric(niter) || length(niter) != 1L || is.na(niter) || niter < 1L) {
+    stop("'niter' must be a positive integer.", call. = FALSE)
+  }
+
+  device <- select_torch_device(cuda)
+  X <- torch::torch_tensor(as.matrix(newdata), device = device)
+  S_fixed <- torch::torch_tensor(object$spectra, device = device)
+  A <- torch::torch_rand(nrow(newdata), nrow(object$spectra), device = device, requires_grad = TRUE)
+  opt <- torch::optim_adam(list(A), lr = lr)
+
+  for (i in seq_len(as.integer(niter))) {
+    opt$zero_grad()
+    Xhat <- A$matmul(S_fixed)
+    loss <- torch::torch_mean((X - Xhat)^2)
+    loss$backward()
+    opt$step()
+    A$data()$clamp_(min = 0)
+
+    if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
+      message(sprintf("Prediction iteration %d/%d, loss = %.6f", i, niter, as.numeric(loss$item())))
+    }
+  }
+
+  spatial <- as.matrix(A$detach()$cpu())
+  reconstruction <- spatial %*% object$spectra
+
+  if (type == "spatial") {
+    return(spatial)
+  }
+  if (type == "reconstruction") {
+    return(reconstruction)
+  }
+
+  if (is.null(nx) || is.null(ny)) {
+    stop("'nx' and 'ny' are required when type = 'cube'.", call. = FALSE)
+  }
+
+  matrix_to_cube(reconstruction, nx = nx, ny = ny)
+}
+
 #' Plot a Spectral Unmixing Result
 #'
 #' Convenience plots for component spectra, spatial maps, and optimization loss.
@@ -662,4 +942,13 @@ resolve_cube <- function(cube) {
   }
 
   cube
+}
+
+infer_cube_dims <- function(x) {
+  cube <- resolve_cube(x)
+  if (!is.array(cube) || length(dim(cube)) != 3L) {
+    return(NULL)
+  }
+
+  dim(cube)[1:2]
 }
