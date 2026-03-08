@@ -98,5 +98,6 @@ cube_hat <- predict(
 
 ## Documentation
 
-Package articles are provided in the `vignettes/` directory. A Quarto website
-is provided in `site/`.
+Package articles are provided in the `vignettes/` directory.
+
+Website: [https://rafaelsdesouza.github.io/SpectralUnmix/](https://rafaelsdesouza.github.io/SpectralUnmix/)
