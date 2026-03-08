@@ -1,0 +1,35 @@
+---
+title: "Reference"
+---
+
+## Model fitting
+
+- `spectral_unmix()`
+- `summary()`
+- `print()`
+
+## Accessors
+
+- `basis()`
+- `coef()`
+- `fitted()`
+- `predict()`
+- `residuals()`
+
+## Cube helpers
+
+- `cube_to_matrix()`
+- `matrix_to_cube()`
+- `component_map()`
+- `component_spectrum()`
+- `component_reconstruction()`
+
+## Visualization
+
+- `plot()`
+- `plot_reconstruction()`
+
+## Examples
+
+- `simulate_ifu_cube()`
+- `demo_ifu_unmix()`

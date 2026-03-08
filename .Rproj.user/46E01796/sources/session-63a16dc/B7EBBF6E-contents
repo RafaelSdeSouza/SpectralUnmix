@@ -589,6 +589,9 @@ residuals.spectral_unmix <- function(object, x, nx = NULL, ny = NULL, ...) {
   }
 
   x <- validate_input_matrix(x)
+  if (nrow(x) != nrow(object$reconstruction) || ncol(x) != ncol(object$reconstruction)) {
+    stop("'x' must have the same dimensions as object$reconstruction.", call. = FALSE)
+  }
   residual <- x - object$reconstruction
 
   if (is.null(nx) && is.null(ny)) {

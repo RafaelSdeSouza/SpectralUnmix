@@ -1,0 +1,43 @@
+---
+title: "IFU Workflow"
+---
+
+## FITS to matrix
+
+```{r, eval = FALSE}
+library(FITSio)
+library(SpectralUnmix)
+
+X <- readFITS("cube.fits")
+Mat <- cube_to_matrix(X)
+Mat[!is.finite(Mat)] <- 0
+Mat <- pmax(Mat, 0)
+```
+
+## Fit and inspect
+
+```{r, eval = FALSE}
+fit <- spectral_unmix(Mat, k = 5, lr = 0.01, niter = 5000)
+
+plot(fit, type = "spectra")
+plot(fit, type = "maps", nx = dim(X$imDat)[1], ny = dim(X$imDat)[2])
+plot_reconstruction(fit, Mat, n = 6)
+```
+
+## Reconstruction outputs
+
+```{r, eval = FALSE}
+maps <- predict(fit, type = "spatial")
+cube_hat <- predict(
+  fit,
+  type = "cube",
+  nx = dim(X$imDat)[1],
+  ny = dim(X$imDat)[2]
+)
+resid <- residuals(
+  fit,
+  x = Mat,
+  nx = dim(X$imDat)[1],
+  ny = dim(X$imDat)[2]
+)
+```

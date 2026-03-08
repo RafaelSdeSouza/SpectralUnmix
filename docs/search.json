@@ -1,0 +1,128 @@
+[
+  {
+    "objectID": "ifu-workflow.html",
+    "href": "ifu-workflow.html",
+    "title": "IFU Workflow",
+    "section": "",
+    "text": "library(FITSio)\nlibrary(SpectralUnmix)\n\nX &lt;- readFITS(\"cube.fits\")\nMat &lt;- cube_to_matrix(X)\nMat[!is.finite(Mat)] &lt;- 0\nMat &lt;- pmax(Mat, 0)"
+  },
+  {
+    "objectID": "ifu-workflow.html#fits-to-matrix",
+    "href": "ifu-workflow.html#fits-to-matrix",
+    "title": "IFU Workflow",
+    "section": "",
+    "text": "library(FITSio)\nlibrary(SpectralUnmix)\n\nX &lt;- readFITS(\"cube.fits\")\nMat &lt;- cube_to_matrix(X)\nMat[!is.finite(Mat)] &lt;- 0\nMat &lt;- pmax(Mat, 0)"
+  },
+  {
+    "objectID": "ifu-workflow.html#fit-and-inspect",
+    "href": "ifu-workflow.html#fit-and-inspect",
+    "title": "IFU Workflow",
+    "section": "Fit and inspect",
+    "text": "Fit and inspect\n\nfit &lt;- spectral_unmix(Mat, k = 5, lr = 0.01, niter = 5000)\n\nplot(fit, type = \"spectra\")\nplot(fit, type = \"maps\", nx = dim(X$imDat)[1], ny = dim(X$imDat)[2])\nplot_reconstruction(fit, Mat, n = 6)"
+  },
+  {
+    "objectID": "ifu-workflow.html#reconstruction-outputs",
+    "href": "ifu-workflow.html#reconstruction-outputs",
+    "title": "IFU Workflow",
+    "section": "Reconstruction outputs",
+    "text": "Reconstruction outputs\n\nmaps &lt;- predict(fit, type = \"spatial\")\ncube_hat &lt;- predict(\n  fit,\n  type = \"cube\",\n  nx = dim(X$imDat)[1],\n  ny = dim(X$imDat)[2]\n)\nresid &lt;- residuals(\n  fit,\n  x = Mat,\n  nx = dim(X$imDat)[1],\n  ny = dim(X$imDat)[2]\n)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "SpectralUnmix",
+    "section": "",
+    "text": "SpectralUnmix is an R package for smooth non-negative spectral unmixing of hyperspectral datasets and astronomical IFU cubes."
+  },
+  {
+    "objectID": "index.html#model",
+    "href": "index.html#model",
+    "title": "SpectralUnmix",
+    "section": "Model",
+    "text": "Model\nThe package solves\n\\[\nX \\approx A S\n\\]\nwhere X is a spaxel-by-wavelength matrix, A contains spatial abundances, and S contains component spectra."
+  },
+  {
+    "objectID": "index.html#main-functions",
+    "href": "index.html#main-functions",
+    "title": "SpectralUnmix",
+    "section": "Main functions",
+    "text": "Main functions\n\nspectral_unmix() fits the model.\ncube_to_matrix() and matrix_to_cube() reshape IFU cubes.\nbasis() and coef() provide NMF-style accessors.\nfitted(), predict(), and residuals() provide standard model methods.\nplot() and plot_reconstruction() provide quick diagnostics."
+  },
+  {
+    "objectID": "index.html#installation",
+    "href": "index.html#installation",
+    "title": "SpectralUnmix",
+    "section": "Installation",
+    "text": "Installation\n# install.packages(\"remotes\")\nremotes::install_github(\"RafaelSdeSouza/SpectralUnmix\")\ntorch must be available in the local R installation."
+  },
+  {
+    "objectID": "reference.html",
+    "href": "reference.html",
+    "title": "Reference",
+    "section": "",
+    "text": "spectral_unmix()\nsummary()\nprint()"
+  },
+  {
+    "objectID": "reference.html#model-fitting",
+    "href": "reference.html#model-fitting",
+    "title": "Reference",
+    "section": "",
+    "text": "spectral_unmix()\nsummary()\nprint()"
+  },
+  {
+    "objectID": "reference.html#accessors",
+    "href": "reference.html#accessors",
+    "title": "Reference",
+    "section": "Accessors",
+    "text": "Accessors\n\nbasis()\ncoef()\nfitted()\npredict()\nresiduals()"
+  },
+  {
+    "objectID": "reference.html#cube-helpers",
+    "href": "reference.html#cube-helpers",
+    "title": "Reference",
+    "section": "Cube helpers",
+    "text": "Cube helpers\n\ncube_to_matrix()\nmatrix_to_cube()\ncomponent_map()\ncomponent_spectrum()\ncomponent_reconstruction()"
+  },
+  {
+    "objectID": "reference.html#visualization",
+    "href": "reference.html#visualization",
+    "title": "Reference",
+    "section": "Visualization",
+    "text": "Visualization\n\nplot()\nplot_reconstruction()"
+  },
+  {
+    "objectID": "reference.html#examples",
+    "href": "reference.html#examples",
+    "title": "Reference",
+    "section": "Examples",
+    "text": "Examples\n\nsimulate_ifu_cube()\ndemo_ifu_unmix()"
+  },
+  {
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Getting Started",
+    "section": "",
+    "text": "library(SpectralUnmix)\n\ndemo &lt;- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 3,\n  lambda_smooth = 0.02,\n  niter = 300,\n  lr = 0.03\n)"
+  },
+  {
+    "objectID": "getting-started.html#simulated-example",
+    "href": "getting-started.html#simulated-example",
+    "title": "Getting Started",
+    "section": "",
+    "text": "library(SpectralUnmix)\n\ndemo &lt;- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 3,\n  lambda_smooth = 0.02,\n  niter = 300,\n  lr = 0.03\n)"
+  },
+  {
+    "objectID": "getting-started.html#standard-interface",
+    "href": "getting-started.html#standard-interface",
+    "title": "Getting Started",
+    "section": "Standard interface",
+    "text": "Standard interface\n\nprint(fit)\nsummary(fit)\nbasis(fit)\ncoef(fit)"
+  },
+  {
+    "objectID": "getting-started.html#plots",
+    "href": "getting-started.html#plots",
+    "title": "Getting Started",
+    "section": "Plots",
+    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)"
+  }
+]

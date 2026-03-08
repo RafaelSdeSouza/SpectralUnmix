@@ -25,8 +25,8 @@ URL: https://github.com/RafaelSdeSouza/SpectralUnmix
 BugReports: https://github.com/RafaelSdeSouza/SpectralUnmix/issues
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-03-08 01:23:35 UTC; rd23aag
+Packaged: 2026-03-08 13:22:19 UTC; rd23aag
 Author: Rafael S. de Souza [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-7207-4584>)
 Maintainer: Rafael S. de Souza <r.s.desouza@herts.ac.uk>
-Built: R 4.5.2; ; 2026-03-08 01:23:55 UTC; unix
+Built: R 4.5.2; ; 2026-03-08 13:34:12 UTC; unix

@@ -45,8 +45,12 @@ fitting.}
 A list with class \code{"spectral_unmix"} containing:
 \itemize{
 \item \code{spatial}: abundance matrix with one column per component.
+\item \code{abundance}: alias of \code{spatial}.
 \item \code{spectra}: component spectra with one row per component.
+\item \code{basis}: component spectra arranged as wavelength-by-component.
+\item \code{coef}: component weights arranged as component-by-spaxel.
 \item \code{reconstruction}: reconstructed matrix \eqn{AS}.
+\item \code{fitted}: alias of \code{reconstruction}.
 \item \code{loss}: objective history over the optimization.
 \item \code{center}: centering values used during preprocessing, or
 \code{FALSE}.

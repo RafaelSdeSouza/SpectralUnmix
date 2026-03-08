@@ -1,0 +1,36 @@
+---
+title: "Getting Started"
+---
+
+## Simulated example
+
+```{r, eval = FALSE}
+library(SpectralUnmix)
+
+demo <- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)
+fit <- spectral_unmix(
+  demo$matrix,
+  k = 3,
+  lambda_smooth = 0.02,
+  niter = 300,
+  lr = 0.03
+)
+```
+
+## Standard interface
+
+```{r, eval = FALSE}
+print(fit)
+summary(fit)
+basis(fit)
+coef(fit)
+```
+
+## Plots
+
+```{r, eval = FALSE}
+plot(fit, type = "spectra", wavelength = demo$wavelength)
+plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
+plot(fit, type = "loss")
+plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
+```

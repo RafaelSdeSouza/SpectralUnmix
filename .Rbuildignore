@@ -2,3 +2,9 @@
 ^\.Rproj\.user$
 ^\.github$
 ^docs$
+^site$
+^paper$
+^qrpca_A_C$
+^PAPER_PLAN\.md$
+^_pkgdown\.yml$
+^index\.md$

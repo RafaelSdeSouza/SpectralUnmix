@@ -1,0 +1,33 @@
+project:
+  type: website
+  output-dir: ../docs
+
+website:
+  title: SpectralUnmix
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: getting-started.qmd
+        text: Getting Started
+      - href: reference.qmd
+        text: Reference
+      - href: ifu-workflow.qmd
+        text: IFU Workflow
+    right:
+      - icon: github
+        href: https://github.com/RafaelSdeSouza/SpectralUnmix
+  page-footer:
+    left: SpectralUnmix
+
+format:
+  html:
+    theme:
+      light: cosmo
+    toc: true
+    css: styles.css
+
+execute:
+  echo: true
+  warning: false
+  message: false

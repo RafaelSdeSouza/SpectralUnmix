@@ -13,7 +13,8 @@ flush(stderr()); flush(stdout())
 
 ### Name: cube_to_matrix
 ### Title: Helpers for Cube Reshaping and Map Extraction
-### Aliases: cube_to_matrix matrix_to_cube component_map
+### Aliases: cube_to_matrix matrix_to_cube component_map component_spectrum
+###   component_reconstruction
 
 ### ** Examples
 
@@ -24,6 +25,8 @@ dim(rebuilt)
 ## Not run: 
 ##D fit <- spectral_unmix(x, k = 3, niter = 50)
 ##D img <- component_map(fit, demo$nx, demo$ny, 2)
+##D spec2 <- component_spectrum(fit, 2)
+##D comp2 <- component_reconstruction(fit, 2, nx = demo$nx, ny = demo$ny)
 ## End(Not run)
 
 
@@ -49,6 +52,38 @@ str(demo, max.level = 1)
 
 
 cleanEx()
+nameEx("model_methods")
+### * model_methods
+
+flush(stderr()); flush(stdout())
+
+### Name: basis
+### Title: Standard Model Methods for SpectralUnmix Fits
+### Aliases: basis basis.spectral_unmix coef.spectral_unmix
+###   fitted.spectral_unmix predict.spectral_unmix residuals.spectral_unmix
+###   summary.spectral_unmix print.summary.spectral_unmix
+
+### ** Examples
+
+fake <- list(
+  spatial = matrix(runif(12), 4, 3),
+  spectra = matrix(runif(15), 3, 5),
+  reconstruction = matrix(runif(20), 4, 5),
+  loss = c(3, 2, 1)
+)
+class(fake) <- "spectral_unmix"
+
+basis(fake)
+coef(fake)
+fitted(fake)
+summary(fake)
+
+x <- matrix(runif(20), 4, 5)
+residuals(fake, x = x)
+
+
+
+cleanEx()
 nameEx("spectral_unmix")
 ### * spectral_unmix
 
@@ -65,6 +100,30 @@ cube <- simulate_ifu_cube(nx = 12, ny = 12, n_wave = 80)
 ##D fit <- spectral_unmix(cube$matrix, k = 3, niter = 150, lr = 0.03)
 ##D print(fit)
 ##D component_map(fit, nx = cube$nx, ny = cube$ny, component = 1)
+## End(Not run)
+
+
+
+cleanEx()
+nameEx("visualization")
+### * visualization
+
+flush(stderr()); flush(stdout())
+
+### Name: plot.spectral_unmix
+### Title: Visualization Helpers for Spectral Unmixing Results
+### Aliases: plot.spectral_unmix plot_reconstruction
+
+### ** Examples
+
+## Not run: 
+##D demo <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+##D fit <- spectral_unmix(demo$matrix, k = 3, niter = 50)
+##D 
+##D plot(fit, type = "spectra", wavelength = demo$wavelength)
+##D plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
+##D plot(fit, type = "loss")
+##D plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
 ## End(Not run)
 
 

@@ -32,7 +32,8 @@ Type 'q()' to quit R.
 > 
 > ### Name: cube_to_matrix
 > ### Title: Helpers for Cube Reshaping and Map Extraction
-> ### Aliases: cube_to_matrix matrix_to_cube component_map
+> ### Aliases: cube_to_matrix matrix_to_cube component_map component_spectrum
+> ###   component_reconstruction
 > 
 > ### ** Examples
 > 
@@ -44,6 +45,8 @@ Type 'q()' to quit R.
 > ## Not run: 
 > ##D fit <- spectral_unmix(x, k = 3, niter = 50)
 > ##D img <- component_map(fit, demo$nx, demo$ny, 2)
+> ##D spec2 <- component_spectrum(fit, 2)
+> ##D comp2 <- component_reconstruction(fit, 2, nx = demo$nx, ny = demo$ny)
 > ## End(Not run)
 > 
 > 
@@ -77,6 +80,64 @@ List of 7
 > 
 > 
 > cleanEx()
+> nameEx("model_methods")
+> ### * model_methods
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: basis
+> ### Title: Standard Model Methods for SpectralUnmix Fits
+> ### Aliases: basis basis.spectral_unmix coef.spectral_unmix
+> ###   fitted.spectral_unmix predict.spectral_unmix residuals.spectral_unmix
+> ###   summary.spectral_unmix print.summary.spectral_unmix
+> 
+> ### ** Examples
+> 
+> fake <- list(
++   spatial = matrix(runif(12), 4, 3),
++   spectra = matrix(runif(15), 3, 5),
++   reconstruction = matrix(runif(20), 4, 5),
++   loss = c(3, 2, 1)
++ )
+> class(fake) <- "spectral_unmix"
+> 
+> basis(fake)
+          [,1]      [,2]       [,3]
+[1,] 0.6870228 0.3841037 0.76984142
+[2,] 0.4976992 0.7176185 0.99190609
+[3,] 0.3800352 0.7774452 0.93470523
+[4,] 0.2121425 0.6516738 0.12555510
+[5,] 0.2672207 0.3861141 0.01339033
+> coef(fake)
+          [,1]       [,2]      [,3]      [,4]
+[1,] 0.2655087 0.37212390 0.5728534 0.9082078
+[2,] 0.2016819 0.89838968 0.9446753 0.6607978
+[3,] 0.6291140 0.06178627 0.2059746 0.1765568
+> fitted(fake)
+          [,1]      [,2]      [,3]      [,4]      [,5]
+[1,] 0.3823880 0.5995658 0.6684667 0.4112744 0.5530363
+[2,] 0.8696908 0.4935413 0.7942399 0.8209463 0.5297196
+[3,] 0.3403490 0.1862176 0.1079436 0.6470602 0.7893562
+[4,] 0.4820801 0.8273733 0.7237109 0.7829328 0.0233312
+> summary(fake)
+SpectralUnmix summary
+  spaxels: 4
+  wavelength channels: 5
+  components: 3
+  iterations: 3
+  final loss: 1.000000
+> 
+> x <- matrix(runif(20), 4, 5)
+> residuals(fake, x = x)
+             [,1]        [,2]        [,3]         [,4]       [,5]
+[1,]  0.094842108  0.26164365 -0.56900058 -0.004444242 -0.2206416
+[2,] -0.137377107 -0.05544420 -0.47796815  0.091929630  0.1211509
+[3,]  0.352382560  0.05857968  0.41069064 -0.353456821 -0.5313395
+[4,] -0.004460493 -0.75669427 -0.06170587 -0.323867036  0.4552140
+> 
+> 
+> 
+> cleanEx()
 > nameEx("spectral_unmix")
 > ### * spectral_unmix
 > 
@@ -97,12 +158,36 @@ List of 7
 > 
 > 
 > 
+> cleanEx()
+> nameEx("visualization")
+> ### * visualization
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: plot.spectral_unmix
+> ### Title: Visualization Helpers for Spectral Unmixing Results
+> ### Aliases: plot.spectral_unmix plot_reconstruction
+> 
+> ### ** Examples
+> 
+> ## Not run: 
+> ##D demo <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+> ##D fit <- spectral_unmix(demo$matrix, k = 3, niter = 50)
+> ##D 
+> ##D plot(fit, type = "spectra", wavelength = demo$wavelength)
+> ##D plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
+> ##D plot(fit, type = "loss")
+> ##D plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
+> ## End(Not run)
+> 
+> 
+> 
 > ### * <FOOTER>
 > ###
 > cleanEx()
 > options(digits = 7L)
 > base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
-Time elapsed:  0.042 0.005 0.048 0 0 
+Time elapsed:  0.041 0.004 0.046 0 0 
 > grDevices::dev.off()
 null device 
           1 

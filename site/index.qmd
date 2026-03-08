@@ -1,0 +1,39 @@
+---
+title: "SpectralUnmix"
+---
+
+`SpectralUnmix` is an R package for smooth non-negative spectral unmixing of
+hyperspectral datasets and astronomical IFU cubes.
+
+::: {.hero-note}
+The package fits a low-rank model that decomposes a spectral matrix into
+component spectra and spatial abundance maps while preserving non-negativity.
+:::
+
+## Model
+
+The package solves
+
+$$
+X \approx A S
+$$
+
+where `X` is a spaxel-by-wavelength matrix, `A` contains spatial abundances,
+and `S` contains component spectra.
+
+## Main functions
+
+- `spectral_unmix()` fits the model.
+- `cube_to_matrix()` and `matrix_to_cube()` reshape IFU cubes.
+- `basis()` and `coef()` provide NMF-style accessors.
+- `fitted()`, `predict()`, and `residuals()` provide standard model methods.
+- `plot()` and `plot_reconstruction()` provide quick diagnostics.
+
+## Installation
+
+```r
+# install.packages("remotes")
+remotes::install_github("RafaelSdeSouza/SpectralUnmix")
+```
+
+`torch` must be available in the local R installation.
