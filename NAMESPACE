@@ -1,1 +1,7 @@
-exportPattern("^[[:alpha:]]+")
+S3method(print,spectral_unmix)
+export(component_map)
+export(cube_to_matrix)
+export(demo_ifu_unmix)
+export(matrix_to_cube)
+export(simulate_ifu_cube)
+export(spectral_unmix)

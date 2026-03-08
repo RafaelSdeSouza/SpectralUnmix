@@ -22,6 +22,11 @@ LazyData: true
 Imports:
     torch
 Suggests:
+    knitr,
+    rmarkdown,
     viridis,
     ggplot2
+VignetteBuilder: knitr
+URL: https://github.com/RafaelSdeSouza/SpectralUnmix
+BugReports: https://github.com/RafaelSdeSouza/SpectralUnmix/issues
 RoxygenNote: 7.3.3
