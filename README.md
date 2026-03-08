@@ -46,11 +46,9 @@ fit <- spectral_unmix(demo$matrix, k = 3, niter = 200, lr = 0.03)
 
 print(fit)
 
-matplot(demo$wavelength, t(fit$spectra), type = "l", lty = 1,
-        xlab = "Wavelength", ylab = "Flux")
-
-image(component_map(fit, nx = demo$nx, ny = demo$ny, component = 1),
-      main = "Component 1", xlab = "x", ylab = "y")
+plot(fit, type = "spectra", wavelength = demo$wavelength)
+plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
+plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
 ```
 
 ## Suggested workflow for a paper or research note

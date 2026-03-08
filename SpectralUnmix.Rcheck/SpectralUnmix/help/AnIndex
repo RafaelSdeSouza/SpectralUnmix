@@ -1,0 +1,9 @@
+SpectralUnmix-package	SpectralUnmix
+component_map	cube_helpers
+cube_to_matrix	cube_helpers
+demo_ifu_unmix	demos
+matrix_to_cube	cube_helpers
+print.spectral_unmix	spectral_unmix
+simulate_ifu_cube	demos
+SpectralUnmix	SpectralUnmix
+spectral_unmix	spectral_unmix

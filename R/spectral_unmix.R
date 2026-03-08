@@ -171,7 +171,8 @@ spectral_unmix <- function(x,
 #' Converts a three-dimensional array with dimensions \code{nx x ny x n_wave}
 #' into a matrix suitable for [spectral_unmix()], with one row per spaxel.
 #'
-#' @param cube Numeric 3D array.
+#' @param cube Numeric 3D array, or a list-like object containing a cube in
+#'   \code{$imDat} or \code{$cube}.
 #'
 #' @return A numeric matrix with \code{nx * ny} rows and \code{n_wave} columns.
 #' @examples
@@ -180,6 +181,8 @@ spectral_unmix <- function(x,
 #' dim(x)
 #' @export
 cube_to_matrix <- function(cube) {
+  cube <- resolve_cube(cube)
+
   if (!is.array(cube) || length(dim(cube)) != 3L) {
     stop("'cube' must be a numeric 3D array.", call. = FALSE)
   }
@@ -244,6 +247,10 @@ component_map <- function(fit, nx, ny, component = 1) {
   if (!inherits(fit, "spectral_unmix")) {
     stop("'fit' must be a result from spectral_unmix().", call. = FALSE)
   }
+  if (!is.numeric(nx) || length(nx) != 1L || nx < 1L ||
+      !is.numeric(ny) || length(ny) != 1L || ny < 1L) {
+    stop("'nx' and 'ny' must be positive integers.", call. = FALSE)
+  }
   if (!is.numeric(component) || length(component) != 1L || component < 1L ||
       component > ncol(fit$spatial)) {
     stop("'component' is out of bounds.", call. = FALSE)
@@ -251,6 +258,76 @@ component_map <- function(fit, nx, ny, component = 1) {
 
   component <- as.integer(component)
   matrix(fit$spatial[, component], nrow = as.integer(nx), ncol = as.integer(ny))
+}
+
+#' Extract a Component Spectrum
+#'
+#' Returns one recovered component spectrum from a fitted model.
+#'
+#' @param fit Result from [spectral_unmix()].
+#' @param component Component index to extract.
+#'
+#' @return A numeric vector.
+#' @examples
+#' \dontrun{
+#' cube <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+#' fit <- spectral_unmix(cube$matrix, k = 3, niter = 50)
+#' spec1 <- component_spectrum(fit, 1)
+#' }
+#' @export
+component_spectrum <- function(fit, component = 1) {
+  if (!inherits(fit, "spectral_unmix")) {
+    stop("'fit' must be a result from spectral_unmix().", call. = FALSE)
+  }
+  if (!is.numeric(component) || length(component) != 1L || component < 1L ||
+      component > nrow(fit$spectra)) {
+    stop("'component' is out of bounds.", call. = FALSE)
+  }
+
+  fit$spectra[as.integer(component), ]
+}
+
+#' Reconstruct a Single Component
+#'
+#' Builds the contribution from one component, either as a spaxel-by-wavelength
+#' matrix or, when dimensions are supplied, as a spectral cube.
+#'
+#' @param fit Result from [spectral_unmix()].
+#' @param component Component index to reconstruct.
+#' @param nx Optional x-axis size for cube output.
+#' @param ny Optional y-axis size for cube output.
+#'
+#' @return A numeric matrix, or a numeric 3D array when \code{nx} and
+#'   \code{ny} are supplied.
+#' @examples
+#' \dontrun{
+#' cube <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+#' fit <- spectral_unmix(cube$matrix, k = 3, niter = 50)
+#' comp1 <- component_reconstruction(fit, 1)
+#' comp1_cube <- component_reconstruction(fit, 1, nx = cube$nx, ny = cube$ny)
+#' }
+#' @export
+component_reconstruction <- function(fit, component = 1, nx = NULL, ny = NULL) {
+  if (!inherits(fit, "spectral_unmix")) {
+    stop("'fit' must be a result from spectral_unmix().", call. = FALSE)
+  }
+  if (!is.numeric(component) || length(component) != 1L || component < 1L ||
+      component > nrow(fit$spectra)) {
+    stop("'component' is out of bounds.", call. = FALSE)
+  }
+
+  component <- as.integer(component)
+  reconstruction <- fit$spatial[, component, drop = FALSE] %*%
+    fit$spectra[component, , drop = FALSE]
+
+  if (is.null(nx) && is.null(ny)) {
+    return(reconstruction)
+  }
+  if (is.null(nx) || is.null(ny)) {
+    stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
+  }
+
+  matrix_to_cube(reconstruction, nx = nx, ny = ny)
 }
 
 #' Simulate a Small IFU-like Cube
@@ -340,30 +417,8 @@ demo_ifu_unmix <- function(k = 3, nx = 18, ny = 18, n_wave = 120, niter = 300, p
   fit <- spectral_unmix(demo$matrix, k = k, niter = niter)
 
   if (isTRUE(plot)) {
-    old_par <- graphics::par(no.readonly = TRUE)
-    on.exit(graphics::par(old_par), add = TRUE)
-
-    graphics::par(mfrow = c(2, k), mar = c(3, 3, 2, 1))
-    for (i in seq_len(k)) {
-      graphics::matplot(
-        demo$wavelength,
-        fit$spectra[i, ],
-        type = "l",
-        lty = 1,
-        xlab = "Wavelength",
-        ylab = "Flux",
-        main = sprintf("Spectrum %d", i)
-      )
-    }
-    for (i in seq_len(k)) {
-      graphics::image(
-        component_map(fit, nx = demo$nx, ny = demo$ny, component = i),
-        main = sprintf("Map %d", i),
-        xlab = "x",
-        ylab = "y",
-        col = grDevices::hcl.colors(32, "YlOrRd", rev = TRUE)
-      )
-    }
+    plot(fit, type = "spectra", wavelength = demo$wavelength)
+    plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
   }
 
   list(data = demo, fit = fit)
@@ -375,8 +430,198 @@ print.spectral_unmix <- function(x, ...) {
   cat(sprintf("  spaxels: %d\n", nrow(x$spatial)))
   cat(sprintf("  wavelength channels: %d\n", ncol(x$spectra)))
   cat(sprintf("  components: %d\n", nrow(x$spectra)))
-  cat(sprintf("  final loss: %.6f\n", tail(x$loss, 1L)))
+  cat(sprintf("  final loss: %.6f\n", utils::tail(x$loss, 1L)))
   invisible(x)
+}
+
+#' Plot a Spectral Unmixing Result
+#'
+#' Convenience plots for component spectra, spatial maps, and optimization loss.
+#'
+#' @param x Result from [spectral_unmix()].
+#' @param type Plot type: \code{"spectra"}, \code{"maps"}, or \code{"loss"}.
+#' @param nx Number of x-axis pixels when plotting maps.
+#' @param ny Number of y-axis pixels when plotting maps.
+#' @param components Optional vector of component indices to display.
+#' @param wavelength Optional wavelength vector for spectra.
+#' @param ... Additional graphical arguments passed to base plotting functions.
+#'
+#' @return Invisibly returns \code{x}.
+#' @examples
+#' \dontrun{
+#' cube <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+#' fit <- spectral_unmix(cube$matrix, k = 3, niter = 50)
+#' plot(fit, type = "spectra", wavelength = cube$wavelength)
+#' plot(fit, type = "maps", nx = cube$nx, ny = cube$ny)
+#' plot(fit, type = "loss")
+#' }
+#' @export
+plot.spectral_unmix <- function(x,
+                                type = c("spectra", "maps", "loss"),
+                                nx = NULL,
+                                ny = NULL,
+                                components = NULL,
+                                wavelength = NULL,
+                                ...) {
+  if (!inherits(x, "spectral_unmix")) {
+    stop("'x' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  type <- match.arg(type)
+
+  if (is.null(components)) {
+    components <- seq_len(nrow(x$spectra))
+  }
+  components <- as.integer(components)
+  if (any(is.na(components)) || any(components < 1L) || any(components > nrow(x$spectra))) {
+    stop("'components' contains invalid indices.", call. = FALSE)
+  }
+
+  if (type == "loss") {
+    graphics::plot(
+      seq_along(x$loss),
+      x$loss,
+      type = "l",
+      xlab = "Iteration",
+      ylab = "Loss",
+      main = "Optimization history",
+      ...
+    )
+    return(invisible(x))
+  }
+
+  if (type == "spectra") {
+    if (is.null(wavelength)) {
+      wavelength <- seq_len(ncol(x$spectra))
+      xlab <- "Wavelength channel"
+    } else {
+      xlab <- "Wavelength"
+    }
+
+    old_par <- graphics::par(no.readonly = TRUE)
+    on.exit(graphics::par(old_par), add = TRUE)
+    graphics::par(mfrow = c(length(components), 1L), mar = c(3, 4, 2, 1))
+
+    for (component in components) {
+      graphics::plot(
+        wavelength,
+        component_spectrum(x, component),
+        type = "l",
+        lwd = 2,
+        xlab = xlab,
+        ylab = "Flux",
+        main = sprintf("Component spectrum %d", component),
+        ...
+      )
+    }
+
+    return(invisible(x))
+  }
+
+  if (is.null(nx) || is.null(ny)) {
+    stop("'nx' and 'ny' are required when type = 'maps'.", call. = FALSE)
+  }
+
+  n_panels <- length(components)
+  n_col <- min(3L, n_panels)
+  n_row <- ceiling(n_panels / n_col)
+
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mfrow = c(n_row, n_col), mar = c(3, 3, 2, 1))
+
+  for (component in components) {
+    graphics::image(
+      component_map(x, nx = nx, ny = ny, component = component),
+      xlab = "x",
+      ylab = "y",
+      main = sprintf("Component map %d", component),
+      col = grDevices::hcl.colors(32, "YlOrRd", rev = TRUE),
+      ...
+    )
+  }
+
+  invisible(x)
+}
+
+#' Plot Data Versus Reconstruction
+#'
+#' Plots observed and reconstructed spectra for selected spaxels.
+#'
+#' @param fit Result from [spectral_unmix()].
+#' @param x Numeric matrix used as input to the fit.
+#' @param pixels Optional vector of spaxel indices to plot.
+#' @param n Number of random spaxels to plot when \code{pixels} is omitted.
+#' @param wavelength Optional wavelength vector.
+#' @param ... Additional graphical arguments passed to \code{plot()}.
+#'
+#' @return Invisibly returns \code{fit}.
+#' @examples
+#' \dontrun{
+#' cube <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+#' fit <- spectral_unmix(cube$matrix, k = 3, niter = 50)
+#' plot_reconstruction(fit, cube$matrix, n = 4, wavelength = cube$wavelength)
+#' }
+#' @export
+plot_reconstruction <- function(fit, x, pixels = NULL, n = 6, wavelength = NULL, ...) {
+  if (!inherits(fit, "spectral_unmix")) {
+    stop("'fit' must be a result from spectral_unmix().", call. = FALSE)
+  }
+
+  x <- validate_input_matrix(x)
+
+  if (nrow(x) != nrow(fit$reconstruction) || ncol(x) != ncol(fit$reconstruction)) {
+    stop("'x' must have the same dimensions as fit$reconstruction.", call. = FALSE)
+  }
+
+  if (is.null(pixels)) {
+    n <- min(as.integer(n), nrow(x))
+    pixels <- sort(sample.int(nrow(x), n))
+  } else {
+    pixels <- as.integer(pixels)
+  }
+  if (any(is.na(pixels)) || any(pixels < 1L) || any(pixels > nrow(x))) {
+    stop("'pixels' contains invalid indices.", call. = FALSE)
+  }
+
+  if (is.null(wavelength)) {
+    wavelength <- seq_len(ncol(x))
+    xlab <- "Wavelength channel"
+  } else {
+    xlab <- "Wavelength"
+  }
+
+  n_panels <- length(pixels)
+  n_col <- min(2L, n_panels)
+  n_row <- ceiling(n_panels / n_col)
+
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mfrow = c(n_row, n_col), mar = c(3, 4, 2, 1))
+
+  for (pixel in pixels) {
+    graphics::plot(
+      wavelength,
+      x[pixel, ],
+      type = "l",
+      lwd = 2,
+      col = "black",
+      xlab = xlab,
+      ylab = "Flux",
+      main = sprintf("Spaxel %d", pixel),
+      ...
+    )
+    graphics::lines(wavelength, fit$reconstruction[pixel, ], col = "red", lwd = 2)
+    graphics::legend(
+      "topright",
+      legend = c("data", "reconstruction"),
+      col = c("black", "red"),
+      lty = 1,
+      bty = "n"
+    )
+  }
+
+  invisible(fit)
 }
 
 select_torch_device <- function(cuda) {
@@ -406,4 +651,15 @@ validate_input_matrix <- function(x) {
   }
 
   x
+}
+
+resolve_cube <- function(cube) {
+  if (is.list(cube) && !is.null(cube$imDat)) {
+    return(cube$imDat)
+  }
+  if (is.list(cube) && !is.null(cube$cube)) {
+    return(cube$cube)
+  }
+
+  cube
 }

@@ -51,10 +51,9 @@ fit <- spectral_unmix(
 
 ```{r, eval = FALSE}
 par(mfrow = c(1, 2))
-matplot(demo$wavelength, t(fit$spectra), type = "l", lty = 1,
-        xlab = "Wavelength", ylab = "Flux")
-image(component_map(fit, demo$nx, demo$ny, 1),
-      main = "Component 1", xlab = "x", ylab = "y")
+plot(fit, type = "spectra", wavelength = demo$wavelength)
+plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
+plot_reconstruction(fit, x, n = 4, wavelength = demo$wavelength)
 ```
 
 ## 5. Extend to real data

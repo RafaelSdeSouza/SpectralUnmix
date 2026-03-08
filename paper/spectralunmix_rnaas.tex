@@ -1,0 +1,123 @@
+\documentclass[rnaas]{aastex7}
+
+\shorttitle{SpectralUnmix}
+\shortauthors{de Souza}
+
+\begin{document}
+
+\title{SpectralUnmix: An R Package for Smooth Spectral Unmixing of IFU and Hyperspectral Data}
+
+\author[0000-0001-7207-4584]{Rafael S. de Souza}
+\email[show]{r.s.desouza@herts.ac.uk}
+\affiliation{University of Hertfordshire, Hatfield, AL10 9AB, UK}
+
+\begin{abstract}
+We present \texttt{SpectralUnmix}, an \texttt{R} package for smooth
+non-negative spectral unmixing of hyperspectral data and astronomical
+integral-field spectroscopy cubes. The package is designed for applications in
+which a spectral cube can be approximated by a small number of non-negative
+component spectra and corresponding spatial abundance maps. The current release
+provides a \texttt{torch}-based optimizer, helpers for reshaping spectral cubes
+into spaxel-by-wavelength matrices, plotting utilities for component maps and
+component spectra, and a synthetic IFU demonstration for reproducible examples.
+The package is intended as a compact and extensible software base for
+astronomy-oriented source separation problems in IFU analysis, and a public
+record of this initial release may be useful while more extensive validation
+and benchmark studies are developed.
+\end{abstract}
+
+\section{Introduction}
+
+Low-rank decompositions are widely used in astronomical data analysis for
+compression, denoising, and exploratory analysis. In the case of
+integral-field-unit (IFU) spectroscopy and other hyperspectral observations,
+one often seeks a representation in which each spaxel spectrum is written as a
+combination of a small number of latent components. Principal-component methods
+are often useful for data compression, but their orthogonality constraints and
+signed components can make direct physical interpretation difficult for some
+astronomical applications. Non-negative matrix factorization (NMF) provides an
+alternative factorization in which both spectral components and spatial weights
+remain non-negative \citep{Lee1999,Cichocki2009}.
+
+\texttt{SpectralUnmix} is an \texttt{R} package developed to support this style
+of decomposition for IFU and hyperspectral data products. The package aims to
+provide a simple software interface for reshaping cubes, fitting a smooth NMF
+model, reconstructing the fitted data, and visualizing component spectra and
+spatial maps. This note is intended as a citable record of the initial package
+release and of the current design choices. It is not yet a full software paper:
+benchmarking against alternative methods and extended real-data validation are
+left to future work.
+
+\section{Model and Package Scope}
+
+The package assumes a linear mixing model,
+\begin{equation}
+\mathbf{X} \approx \mathbf{A}\mathbf{S},
+\end{equation}
+where $\mathbf{X}$ is a spaxel-by-wavelength matrix, $\mathbf{A}$ is a
+non-negative abundance matrix, and $\mathbf{S}$ contains non-negative component
+spectra. In the present implementation, optimization is performed with
+\texttt{torch} \citep{Falbel2023} and includes an optional first-difference
+smoothness penalty on the recovered spectra. This regularization is useful when
+the desired components are expected to vary smoothly with wavelength apart from
+localized spectral features.
+
+The current package release provides:
+\begin{enumerate}
+\item \texttt{spectral\_unmix()} for model fitting;
+\item \texttt{cube\_to\_matrix()} and \texttt{matrix\_to\_cube()} for reshaping
+data products;
+\item \texttt{component\_map()}, \texttt{component\_spectrum()}, and
+\texttt{component\_reconstruction()} for inspecting fitted components; and
+\item plotting helpers for component spectra, spatial maps, optimization loss,
+and data-versus-reconstruction diagnostics.
+\end{enumerate}
+
+To support documentation and testing, the package also includes a synthetic IFU
+generator that produces a small cube with continuum-like and emission-like
+components. This synthetic example is not intended as an astrophysical model of
+any specific source. Its purpose is to provide a fully reproducible example for
+the package website, tutorials, and method development.
+
+\section{Current Use Case}
+
+The intended use case is straightforward. A user begins with a cube of shape
+$N_x \times N_y \times N_\lambda$, reshapes it to a two-dimensional matrix,
+fits a model with a user-specified number of components, and then transforms
+the abundance vectors back into component maps. The fitted object also stores
+the full reconstruction, which supports residual inspection and direct
+comparison between observed and reconstructed spectra for selected spaxels.
+
+For astronomy-oriented workflows, the immediate target applications are IFU
+cubes from public surveys and instruments for which the dominant structures can
+plausibly be described by a small number of interpretable latent spectra and
+spatial distributions. Candidate future examples include MaNGA-like galaxy
+cubes and MUSE observations. The current release does not yet include a
+package-native FITS reader or benchmark scripts, and these are the next
+priority additions before a longer journal article is attempted.
+
+\section{Why This Note Rather Than a Full Software Paper}
+
+The present repository contains a coherent first software release, but it does
+not yet support the stronger claims usually expected from a full
+\emph{Astronomy and Computing} paper. In particular, the package still needs
+benchmark comparisons against standard NMF and PCA-style baselines, a public
+real-data analysis vignette, and a more complete discussion of model selection
+and uncertainty. A short research note is therefore the appropriate venue for
+announcing the package and establishing a citable software record while the
+more extensive validation work is in progress.
+
+\section{Availability}
+
+The source code, documentation, and manuscript materials are available in the
+public \texttt{SpectralUnmix} repository:
+\url{https://github.com/RafaelSdeSouza/SpectralUnmix}.
+
+\acknowledgments
+This manuscript was prepared as an initial software note for the public release
+of \texttt{SpectralUnmix}. The package currently uses \texttt{torch} through
+the \texttt{R} interface for tensor operations and optimization.
+
+\bibliography{spectralunmix}
+
+\end{document}

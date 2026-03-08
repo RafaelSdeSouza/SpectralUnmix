@@ -1,0 +1,6 @@
+cube_to_matrix          Helpers for Cube Reshaping and Map Extraction
+simulate_ifu_cube       Synthetic IFU Demos
+spectral_unmix          Spectral Unmixing for Hyperspectral and IFU
+                        Data
+SpectralUnmix           SpectralUnmix: Spectral Unmixing for
+                        Hyperspectral and IFU Data

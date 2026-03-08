@@ -1,0 +1,114 @@
+
+R version 4.5.2 (2025-10-31) -- "[Not] Part in a Rumble"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "SpectralUnmix"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('SpectralUnmix')
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("cube_helpers")
+> ### * cube_helpers
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: cube_to_matrix
+> ### Title: Helpers for Cube Reshaping and Map Extraction
+> ### Aliases: cube_to_matrix matrix_to_cube component_map
+> 
+> ### ** Examples
+> 
+> demo <- simulate_ifu_cube(nx = 6, ny = 5, n_wave = 20)
+> x <- cube_to_matrix(demo$cube)
+> rebuilt <- matrix_to_cube(x, demo$nx, demo$ny)
+> dim(rebuilt)
+[1]  6  5 20
+> ## Not run: 
+> ##D fit <- spectral_unmix(x, k = 3, niter = 50)
+> ##D img <- component_map(fit, demo$nx, demo$ny, 2)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("demos")
+> ### * demos
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: simulate_ifu_cube
+> ### Title: Synthetic IFU Demos
+> ### Aliases: simulate_ifu_cube demo_ifu_unmix
+> 
+> ### ** Examples
+> 
+> demo <- simulate_ifu_cube()
+> str(demo, max.level = 1)
+List of 7
+ $ cube      : num [1:20, 1:20, 1:120] 0.265 0.296 0.309 0.356 0.365 ...
+ $ matrix    : num [1:400, 1:120] 0.265 0.296 0.309 0.356 0.365 ...
+ $ spectra   : num [1:3, 1:120] 2.18 0.15 0.25 2.16 0.15 ...
+ $ abundances:List of 3
+ $ wavelength: num [1:120] 3600 3630 3661 3691 3721 ...
+ $ nx        : int 20
+ $ ny        : int 20
+> ## Not run: 
+> ##D result <- demo_ifu_unmix(plot = TRUE, niter = 150)
+> ## End(Not run)
+> 
+> 
+> 
+> cleanEx()
+> nameEx("spectral_unmix")
+> ### * spectral_unmix
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: spectral_unmix
+> ### Title: Spectral Unmixing for Hyperspectral and IFU Data
+> ### Aliases: spectral_unmix print.spectral_unmix
+> 
+> ### ** Examples
+> 
+> cube <- simulate_ifu_cube(nx = 12, ny = 12, n_wave = 80)
+> ## Not run: 
+> ##D fit <- spectral_unmix(cube$matrix, k = 3, niter = 150, lr = 0.03)
+> ##D print(fit)
+> ##D component_map(fit, nx = cube$nx, ny = cube$ny, component = 1)
+> ## End(Not run)
+> 
+> 
+> 
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.042 0.005 0.048 0 0 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
