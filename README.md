@@ -96,6 +96,37 @@ cube_hat <- predict(
 )
 ```
 
+## Real spectra demo
+
+```r
+real_demo <- coelho_demo_spectra()
+dim(real_demo$matrix)
+
+fit_real <- spectral_unmix(
+  real_demo$matrix,
+  k = 3,
+  lambda_smooth = 0.001,
+  niter = 400,
+  lr = 0.03
+)
+```
+
+## Stellar library subset
+
+```r
+stellar_lib <- coelho_stellar_subset()
+dim(stellar_lib$matrix)
+table(stellar_lib$metadata$type)
+
+fit_lib <- spectral_unmix(
+  stellar_lib$matrix,
+  k = 5,
+  lambda_smooth = 0.001,
+  niter = 500,
+  lr = 0.03
+)
+```
+
 ## Documentation
 
 Package articles are provided in the `vignettes/` directory.

@@ -34,3 +34,55 @@ plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
 plot(fit, type = "loss")
 plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
 ```
+
+## Real library example
+
+```{r}
+real_demo <- coelho_demo_spectra()
+dim(real_demo$matrix)
+real_demo$metadata
+```
+
+```{r, eval = FALSE}
+fit_real <- spectral_unmix(
+  real_demo$matrix,
+  k = 3,
+  lambda_smooth = 0.001,
+  niter = 400,
+  lr = 0.03
+)
+
+plot(fit_real, type = "spectra", wavelength = real_demo$wavelength)
+plot_reconstruction(
+  fit_real,
+  real_demo$matrix,
+  n = 4,
+  wavelength = real_demo$wavelength
+)
+```
+
+## Stellar library compression
+
+```{r}
+stellar_lib <- coelho_stellar_subset()
+dim(stellar_lib$matrix)
+table(stellar_lib$metadata$type)
+```
+
+```{r, eval = FALSE}
+fit_lib <- spectral_unmix(
+  stellar_lib$matrix,
+  k = 5,
+  lambda_smooth = 0.001,
+  niter = 500,
+  lr = 0.03
+)
+
+plot(fit_lib, type = "spectra", wavelength = stellar_lib$wavelength)
+plot_reconstruction(
+  fit_lib,
+  stellar_lib$matrix,
+  n = 6,
+  wavelength = stellar_lib$wavelength
+)
+```
