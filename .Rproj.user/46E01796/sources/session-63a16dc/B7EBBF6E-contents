@@ -22,6 +22,8 @@
 #'   fitting.
 #' @param cuda Logical; if \code{TRUE}, request CUDA execution.
 #' @param verbose Logical; if \code{TRUE}, emit progress every 100 iterations.
+#' @param metadata Optional metadata list to carry through the fitted object,
+#'   reconstructed cubes, and prediction outputs.
 #'
 #' @return A list with class \code{"spectral_unmix"} containing:
 #' \itemize{
@@ -33,6 +35,8 @@
 #'   \item \code{reconstruction}: reconstructed matrix \eqn{AS}.
 #'   \item \code{fitted}: alias of \code{reconstruction}.
 #'   \item \code{loss}: objective history over the optimization.
+#'   \item \code{metadata}: optional metadata carried from the input matrix or
+#'     provided explicitly.
 #'   \item \code{center}: centering values used during preprocessing, or
 #'     \code{FALSE}.
 #'   \item \code{scale}: scaling values used during preprocessing, or
@@ -76,11 +80,13 @@ spectral_unmix <- function(x,
                            center = FALSE,
                            scale = FALSE,
                            cuda = FALSE,
-                           verbose = FALSE) {
+                           verbose = FALSE,
+                           metadata = NULL) {
   if (!requireNamespace("torch", quietly = TRUE)) {
     stop("The 'torch' package must be installed to use spectral_unmix().", call. = FALSE)
   }
 
+  input_metadata <- merge_metadata(extract_matrix_metadata(x), metadata)
   x <- validate_input_matrix(x)
 
   if (!is.numeric(k) || length(k) != 1L || is.na(k) || k < 1L) {
@@ -169,6 +175,7 @@ spectral_unmix <- function(x,
     reconstruction = reconstruction,
     fitted = reconstruction,
     loss = loss_history,
+    metadata = input_metadata,
     center = if (is.null(cen)) FALSE else cen,
     scale = if (is.null(sc)) FALSE else sc,
     call = match.call()
@@ -193,6 +200,7 @@ spectral_unmix <- function(x,
 #' dim(x)
 #' @export
 cube_to_matrix <- function(cube) {
+  metadata <- extract_cube_metadata(cube)
   cube <- resolve_cube(cube)
 
   if (!is.array(cube) || length(dim(cube)) != 3L) {
@@ -203,7 +211,10 @@ cube_to_matrix <- function(cube) {
   }
 
   dims <- dim(cube)
-  matrix(cube, nrow = dims[1L] * dims[2L], ncol = dims[3L], byrow = FALSE)
+  x <- matrix(cube, nrow = dims[1L] * dims[2L], ncol = dims[3L], byrow = FALSE)
+  attr(x, "spectral_unmix_metadata") <- metadata
+  attr(x, "spectral_unmix_dim") <- dims[1:2]
+  x
 }
 
 #' Reshape a Matrix Back Into a Cube
@@ -214,6 +225,7 @@ cube_to_matrix <- function(cube) {
 #' @param x Numeric matrix with one row per spatial pixel.
 #' @param nx Number of x-axis pixels.
 #' @param ny Number of y-axis pixels.
+#' @param metadata Optional metadata list to attach to the returned cube.
 #'
 #' @return A numeric 3D array.
 #' @examples
@@ -221,7 +233,7 @@ cube_to_matrix <- function(cube) {
 #' rebuilt <- matrix_to_cube(cube$matrix, cube$nx, cube$ny)
 #' dim(rebuilt)
 #' @export
-matrix_to_cube <- function(x, nx, ny) {
+matrix_to_cube <- function(x, nx, ny, metadata = NULL) {
   x <- validate_input_matrix(x)
 
   if (!is.numeric(nx) || length(nx) != 1L || nx < 1L ||
@@ -236,7 +248,12 @@ matrix_to_cube <- function(x, nx, ny) {
     stop("nrow(x) must equal nx * ny.", call. = FALSE)
   }
 
-  array(x, dim = c(nx, ny, ncol(x)))
+  cube <- array(x, dim = c(nx, ny, ncol(x)))
+  cube_metadata <- merge_metadata(extract_matrix_metadata(x), metadata)
+  if (length(cube_metadata) > 0L) {
+    attr(cube, "spectral_unmix_metadata") <- cube_metadata
+  }
+  cube
 }
 
 #' Extract a Component Map
@@ -339,7 +356,7 @@ component_reconstruction <- function(fit, component = 1, nx = NULL, ny = NULL) {
     stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
   }
 
-  matrix_to_cube(reconstruction, nx = nx, ny = ny)
+  matrix_to_cube(reconstruction, nx = nx, ny = ny, metadata = fit$metadata)
 }
 
 #' Simulate a Small IFU-like Cube
@@ -444,6 +461,26 @@ print.spectral_unmix <- function(x, ...) {
   cat(sprintf("  components: %d\n", nrow(x$spectra)))
   cat(sprintf("  final loss: %.6f\n", utils::tail(x$loss, 1L)))
   invisible(x)
+}
+
+#' Return Stored Metadata
+#'
+#' Retrieves metadata carried by matrices, cubes, or fitted
+#' \code{"spectral_unmix"} objects.
+#'
+#' @param object Matrix, cube, or fitted object.
+#'
+#' @return A metadata list, or \code{NULL} when no metadata is present.
+#' @examples
+#' demo <- simulate_ifu_cube()
+#' cube_metadata(demo$cube)
+#' @export
+cube_metadata <- function(object) {
+  if (inherits(object, "spectral_unmix")) {
+    return(object$metadata)
+  }
+
+  attr(object, "spectral_unmix_metadata", exact = TRUE)
 }
 
 #' Summarize a Spectral Unmixing Fit
@@ -564,7 +601,7 @@ fitted.spectral_unmix <- function(object, nx = NULL, ny = NULL, ...) {
     stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
   }
 
-  matrix_to_cube(object$reconstruction, nx = nx, ny = ny)
+  matrix_to_cube(object$reconstruction, nx = nx, ny = ny, metadata = object$metadata)
 }
 
 #' Compute Residuals
@@ -601,7 +638,7 @@ residuals.spectral_unmix <- function(object, x, nx = NULL, ny = NULL, ...) {
     stop("Supply both 'nx' and 'ny' to return a cube.", call. = FALSE)
   }
 
-  matrix_to_cube(residual, nx = nx, ny = ny)
+  matrix_to_cube(residual, nx = nx, ny = ny, metadata = object$metadata)
 }
 
 #' Predict From a Fitted Spectral Unmixing Model
@@ -656,14 +693,16 @@ predict.spectral_unmix <- function(object,
     if (is.null(nx) || is.null(ny)) {
       stop("'nx' and 'ny' are required when type = 'cube'.", call. = FALSE)
     }
-    return(matrix_to_cube(object$reconstruction, nx = nx, ny = ny))
+    return(matrix_to_cube(object$reconstruction, nx = nx, ny = ny, metadata = object$metadata))
   }
 
+  prediction_metadata <- extract_matrix_metadata(newdata)
   cube_dims <- infer_cube_dims(newdata)
   if (!is.null(cube_dims)) {
     nx <- cube_dims[1L]
     ny <- cube_dims[2L]
     newdata <- cube_to_matrix(newdata)
+    prediction_metadata <- merge_metadata(prediction_metadata, extract_matrix_metadata(newdata))
   }
 
   if (!requireNamespace("torch", quietly = TRUE)) {
@@ -714,7 +753,12 @@ predict.spectral_unmix <- function(object,
     stop("'nx' and 'ny' are required when type = 'cube'.", call. = FALSE)
   }
 
-  matrix_to_cube(reconstruction, nx = nx, ny = ny)
+  matrix_to_cube(
+    reconstruction,
+    nx = nx,
+    ny = ny,
+    metadata = merge_metadata(prediction_metadata, object$metadata)
+  )
 }
 
 #' Plot a Spectral Unmixing Result
@@ -954,4 +998,46 @@ infer_cube_dims <- function(x) {
   }
 
   dim(cube)[1:2]
+}
+
+extract_cube_metadata <- function(x) {
+  if (inherits(x, "spectral_unmix")) {
+    return(x$metadata)
+  }
+
+  metadata <- attr(x, "spectral_unmix_metadata", exact = TRUE)
+  if (!is.null(metadata)) {
+    return(metadata)
+  }
+
+  if (is.list(x)) {
+    keep <- setdiff(names(x), c("imDat", "cube"))
+    if (length(keep) > 0L) {
+      return(x[keep])
+    }
+  }
+
+  NULL
+}
+
+extract_matrix_metadata <- function(x) {
+  metadata <- attr(x, "spectral_unmix_metadata", exact = TRUE)
+  dims <- attr(x, "spectral_unmix_dim", exact = TRUE)
+
+  if (!is.null(dims)) {
+    metadata <- merge_metadata(metadata, list(dim_xy = dims))
+  }
+
+  metadata
+}
+
+merge_metadata <- function(x, y) {
+  if (is.null(x) || length(x) == 0L) {
+    return(y)
+  }
+  if (is.null(y) || length(y) == 0L) {
+    return(x)
+  }
+
+  utils::modifyList(x, y)
 }

@@ -64,6 +64,9 @@ residuals(fit, x = demo$matrix)
 # in-sample or new-data prediction
 predict(fit)
 predict(fit, newdata = demo$cube, type = "spatial")
+
+# metadata carried by the fit
+cube_metadata(fit)
 ```
 
 ## Visualization
@@ -94,7 +97,14 @@ cube_hat <- predict(
   nx = dim(X$imDat)[1],
   ny = dim(X$imDat)[2]
 )
+
+# recover stored FITS-side metadata such as headers or redshift if present
+meta <- cube_metadata(cube_hat)
 ```
+
+When `cube_to_matrix()` receives a FITS-like list object, it now carries
+non-image entries such as headers and other metadata through the matrix, the
+fitted object, and reconstructed cubes.
 
 ## Real spectra demo
 
