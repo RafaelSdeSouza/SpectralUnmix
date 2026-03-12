@@ -11,7 +11,7 @@ identifiers:
   - type: url
     value: "https://github.com/RafaelSdeSouza/SpectralUnmix"
 repository-code: "https://github.com/RafaelSdeSouza/SpectralUnmix"
-license: "GPL-3.0-only"
+license: "MIT"
 version: "0.1.0"
 date-released: "2026-03-12"
 abstract: >-

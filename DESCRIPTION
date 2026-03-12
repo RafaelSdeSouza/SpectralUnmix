@@ -16,7 +16,7 @@ Description: SpectralUnmix provides tools for spectral–spatial decomposition o
     into spatial abundance maps and spectral components.
     Optional spectral regularization can be applied to encourage smooth
     physically meaningful spectra.
-License: GPL-3 + file LICENSE
+License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
     torch

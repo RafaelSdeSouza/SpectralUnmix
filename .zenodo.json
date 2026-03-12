@@ -2,7 +2,7 @@
   "title": "SpectralUnmix: A Torch-Based Regularized Non-negative Matrix Factorization",
   "description": "SpectralUnmix is an R package for smooth non-negative spectral unmixing of hyperspectral and astronomical IFU data. The package fits a regularized factorization model and provides helpers for reshaping cubes, reconstructing components, and preserving cube-side metadata through fitted outputs.",
   "upload_type": "software",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "creators": [
     {
       "name": "de Souza, Rafael S.",
