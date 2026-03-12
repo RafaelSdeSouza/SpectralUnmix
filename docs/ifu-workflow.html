@@ -167,6 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#fits-to-matrix" id="toc-fits-to-matrix" class="nav-link active" data-scroll-target="#fits-to-matrix">FITS to matrix</a></li>
   <li><a href="#fit-and-inspect" id="toc-fit-and-inspect" class="nav-link" data-scroll-target="#fit-and-inspect">Fit and inspect</a></li>
   <li><a href="#reconstruction-outputs" id="toc-reconstruction-outputs" class="nav-link" data-scroll-target="#reconstruction-outputs">Reconstruction outputs</a></li>
+  <li><a href="#metadata-and-redshift" id="toc-metadata-and-redshift" class="nav-link" data-scroll-target="#metadata-and-redshift">Metadata and redshift</a></li>
   </ul>
 </nav>
     </div>
@@ -231,6 +232,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">ny =</span> <span class="fu">dim</span>(X<span class="sc">$</span>imDat)[<span class="dv">2</span>]</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+</section>
+<section id="metadata-and-redshift" class="level2">
+<h2 class="anchored" data-anchor-id="metadata-and-redshift">Metadata and redshift</h2>
+<p>When the input to <code>cube_to_matrix()</code> is a FITS-like list object, non-image entries are carried forward as metadata. That metadata can be recovered from the fitted object or reconstructed cube with <code>cube_metadata()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">spectral_unmix</span>(Mat, <span class="at">k =</span> <span class="dv">5</span>, <span class="at">lr =</span> <span class="fl">0.01</span>, <span class="at">niter =</span> <span class="dv">5000</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cube_metadata</span>(fit)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cube_metadata</span>(cube_hat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>If redshift information is stored in the FITS-side metadata, it will now be preserved as metadata, but it is not yet used automatically for rest-frame correction. For cubes with spatially varying velocity structure, rest-frame alignment or continuum preprocessing before factorization may be important.</p>
 
 
 </section>

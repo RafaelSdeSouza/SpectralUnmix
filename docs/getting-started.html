@@ -167,6 +167,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#simulated-example" id="toc-simulated-example" class="nav-link active" data-scroll-target="#simulated-example">Simulated example</a></li>
   <li><a href="#standard-interface" id="toc-standard-interface" class="nav-link" data-scroll-target="#standard-interface">Standard interface</a></li>
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
+  <li><a href="#what-the-outputs-mean" id="toc-what-the-outputs-mean" class="nav-link" data-scroll-target="#what-the-outputs-mean">What the outputs mean</a></li>
+  <li><a href="#real-library-example" id="toc-real-library-example" class="nav-link" data-scroll-target="#real-library-example">Real library example</a></li>
+  <li><a href="#common-failure-mode" id="toc-common-failure-mode" class="nav-link" data-scroll-target="#common-failure-mode">Common failure mode</a></li>
+  <li><a href="#stellar-library-compression" id="toc-stellar-library-compression" class="nav-link" data-scroll-target="#stellar-library-compression">Stellar library compression</a></li>
   </ul>
 </nav>
     </div>
@@ -192,37 +196,134 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SpectralUnmix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <section id="simulated-example" class="level2">
 <h2 class="anchored" data-anchor-id="simulated-example">Simulated example</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SpectralUnmix)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>demo <span class="ot">&lt;-</span> <span class="fu">simulate_ifu_cube</span>(<span class="at">nx =</span> <span class="dv">16</span>, <span class="at">ny =</span> <span class="dv">16</span>, <span class="at">n_wave =</span> <span class="dv">100</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">spectral_unmix</span>(</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  demo<span class="sc">$</span>matrix,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">3</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda_smooth =</span> <span class="fl">0.02</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">niter =</span> <span class="dv">300</span>,</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.03</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>demo <span class="ot">&lt;-</span> <span class="fu">simulate_ifu_cube</span>(<span class="at">nx =</span> <span class="dv">16</span>, <span class="at">ny =</span> <span class="dv">16</span>, <span class="at">n_wave =</span> <span class="dv">100</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">spectral_unmix</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  demo<span class="sc">$</span>matrix,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">3</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda_smooth =</span> <span class="fl">0.02</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">niter =</span> <span class="dv">300</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.03</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="standard-interface" class="level2">
 <h2 class="anchored" data-anchor-id="standard-interface">Standard interface</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">basis</span>(fit)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">basis</span>(fit)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="plots" class="level2">
 <h2 class="anchored" data-anchor-id="plots">Plots</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"spectra"</span>, <span class="at">wavelength =</span> demo<span class="sc">$</span>wavelength)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"maps"</span>, <span class="at">nx =</span> demo<span class="sc">$</span>nx, <span class="at">ny =</span> demo<span class="sc">$</span>ny)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"loss"</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reconstruction</span>(fit, demo<span class="sc">$</span>matrix, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">wavelength =</span> demo<span class="sc">$</span>wavelength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"spectra"</span>, <span class="at">wavelength =</span> demo<span class="sc">$</span>wavelength)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"maps"</span>, <span class="at">nx =</span> demo<span class="sc">$</span>nx, <span class="at">ny =</span> demo<span class="sc">$</span>ny)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"loss"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reconstruction</span>(fit, demo<span class="sc">$</span>matrix, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">wavelength =</span> demo<span class="sc">$</span>wavelength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="what-the-outputs-mean" class="level2">
+<h2 class="anchored" data-anchor-id="what-the-outputs-mean">What the outputs mean</h2>
+<ul>
+<li><code>fit$spatial</code> contains one abundance weight per spaxel and per component.</li>
+<li><code>fit$spectra</code> contains the recovered component spectra.</li>
+<li><code>fit$reconstruction</code> is the model approximation <code>A %*% S</code>.</li>
+<li><code>fitted(fit, nx, ny)</code> and <code>predict(fit, type = "cube", nx, ny)</code> reshape that reconstruction back into a cube.</li>
+<li><code>residuals(fit, x = ...)</code> returns data minus reconstruction.</li>
+</ul>
+</section>
+<section id="real-library-example" class="level2">
+<h2 class="anchored" data-anchor-id="real-library-example">Real library example</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>real_demo <span class="ot">&lt;-</span> <span class="fu">coelho_demo_spectra</span>()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(real_demo<span class="sc">$</span>matrix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]    4 2250</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>real_demo<span class="sc">$</span>metadata</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           id                         file  teff logg feh
+1  cool_giant t03000_g-0.5_p00p00_sed.fits  3000 -0.5 0.0
+2 solar_dwarf t05750_g+4.5_p00p04_sed.fits  5750  4.5 0.0
+3      a_star t09000_g+4.5_p00p00_sed.fits  9000  4.5 0.0
+4    hot_star t18000_g+4.5_p02p00_sed.fits 18000  4.5 0.2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit_real <span class="ot">&lt;-</span> <span class="fu">spectral_unmix</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  real_demo<span class="sc">$</span>matrix,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">3</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda_smooth =</span> <span class="fl">0.001</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">niter =</span> <span class="dv">400</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.03</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_real, <span class="at">type =</span> <span class="st">"spectra"</span>, <span class="at">wavelength =</span> real_demo<span class="sc">$</span>wavelength)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reconstruction</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  fit_real,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  real_demo<span class="sc">$</span>matrix,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">4</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">wavelength =</span> real_demo<span class="sc">$</span>wavelength</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="common-failure-mode" class="level2">
+<h2 class="anchored" data-anchor-id="common-failure-mode">Common failure mode</h2>
+<p>If reconstructed spectra look almost identical across the cube and only the intensity changes, the fit has effectively collapsed toward a rank-1 solution or toward several nearly identical components. In practice this usually means one or more of the following:</p>
+<ul>
+<li>the input cube is dominated by a single continuum shape</li>
+<li><code>lambda_smooth</code> is too large and forces spectra to become too similar</li>
+<li><code>k</code> is too small, or the optimization has converged to a poor local minimum</li>
+<li>the data need preprocessing such as continuum normalization, masking, or rest-frame alignment before factorization</li>
+</ul>
+<p>Useful checks are:</p>
+<ul>
+<li>plot the recovered component spectra and see whether they are nearly identical</li>
+<li>inspect the loss curve with <code>plot(fit, type = "loss")</code></li>
+<li>retry with multiple values of <code>k</code></li>
+<li>reduce <code>lambda_smooth</code></li>
+<li>shift spectra to the rest frame before fitting when redshift varies</li>
+</ul>
+</section>
+<section id="stellar-library-compression" class="level2">
+<h2 class="anchored" data-anchor-id="stellar-library-compression">Stellar library compression</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>stellar_lib <span class="ot">&lt;-</span> <span class="fu">coelho_stellar_subset</span>()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(stellar_lib<span class="sc">$</span>matrix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  100 2250</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(stellar_lib<span class="sc">$</span>metadata<span class="sc">$</span>type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  a_f_star cool_dwarf cool_giant   hot_star solar_like 
+        20         20         20         20         20 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit_lib <span class="ot">&lt;-</span> <span class="fu">spectral_unmix</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  stellar_lib<span class="sc">$</span>matrix,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">k =</span> <span class="dv">5</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda_smooth =</span> <span class="fl">0.001</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">niter =</span> <span class="dv">500</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.03</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit_lib, <span class="at">type =</span> <span class="st">"spectra"</span>, <span class="at">wavelength =</span> stellar_lib<span class="sc">$</span>wavelength)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reconstruction</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  fit_lib,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  stellar_lib<span class="sc">$</span>matrix,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">6</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">wavelength =</span> stellar_lib<span class="sc">$</span>wavelength</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
