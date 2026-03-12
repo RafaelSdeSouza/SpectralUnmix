@@ -2,11 +2,13 @@
 title: "Getting Started"
 ---
 
+```{r}
+library(SpectralUnmix)
+```
+
 ## Simulated example
 
 ```{r, eval = FALSE}
-library(SpectralUnmix)
-
 demo <- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)
 fit <- spectral_unmix(
   demo$matrix,
