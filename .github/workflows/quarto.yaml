@@ -23,8 +23,11 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::knitr, any::rmarkdown
+          extra-packages: any::knitr, any::rmarkdown, any::remotes
       - uses: actions/configure-pages@v5
+      - name: Install SpectralUnmix
+        run: remotes::install_local(".", dependencies = TRUE, upgrade = "never")
+        shell: Rscript {0}
       - name: Render website
         uses: quarto-dev/quarto-actions/render@v2
         with:
@@ -32,7 +35,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: site/_site
 
   deploy:
     environment:
