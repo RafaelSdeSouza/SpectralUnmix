@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use SpectralUnmix, please cite the software release archived on Zenodo and the associated RNAAS article."
+title: "SpectralUnmix: A Torch-Based Regularized Non-negative Matrix Factorization"
+type: software
+authors:
+  - family-names: "de Souza"
+    given-names: "Rafael S."
+    orcid: "https://orcid.org/0000-0001-7207-4584"
+    affiliation: "University of Hertfordshire"
+identifiers:
+  - type: url
+    value: "https://github.com/RafaelSdeSouza/SpectralUnmix"
+repository-code: "https://github.com/RafaelSdeSouza/SpectralUnmix"
+license: "GPL-3.0-only"
+version: "0.1.0"
+date-released: "2026-03-12"
+abstract: >-
+  SpectralUnmix is an R package for smooth non-negative spectral unmixing of
+  hyperspectral and astronomical IFU data. The package fits a regularized
+  factorization model and provides helpers for reshaping cubes, reconstructing
+  components, and preserving cube-side metadata through fitted outputs.
+keywords:
+  - astronomy
+  - astroinformatics
+  - R
+  - torch
+  - non-negative matrix factorization
+  - IFU spectroscopy
+  - hyperspectral imaging
