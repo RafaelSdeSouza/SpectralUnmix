@@ -55,6 +55,4 @@ cube_metadata(cube_hat)
 ```
 
 If redshift information is stored in the FITS-side metadata, it will now be
-preserved as metadata, but it is not yet used automatically for rest-frame
-correction. For cubes with spatially varying velocity structure, rest-frame
-alignment or continuum preprocessing before factorization may be important.
+preserved as metadata and can be carried into fitted and reconstructed outputs.

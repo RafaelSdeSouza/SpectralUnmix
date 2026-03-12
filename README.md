@@ -110,18 +110,6 @@ When `cube_to_matrix()` receives a FITS-like list object, it now carries
 non-image entries such as headers and other metadata through the matrix, the
 fitted object, and reconstructed cubes.
 
-## Troubleshooting
-
-If reconstructed spectra look nearly identical across the cube and differ
-mainly in intensity, the model has usually collapsed toward one dominant
-spectral shape. Common reasons are:
-
-- one continuum component dominates the cube
-- `lambda_smooth` is too large
-- `k` is too small
-- the fit is stuck in a poor local minimum
-- the spectra should be normalized or shifted to the rest frame first
-
 ## Real spectra demo
 
 ```r

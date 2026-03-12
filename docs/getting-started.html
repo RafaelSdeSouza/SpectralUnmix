@@ -169,7 +169,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
   <li><a href="#what-the-outputs-mean" id="toc-what-the-outputs-mean" class="nav-link" data-scroll-target="#what-the-outputs-mean">What the outputs mean</a></li>
   <li><a href="#real-library-example" id="toc-real-library-example" class="nav-link" data-scroll-target="#real-library-example">Real library example</a></li>
-  <li><a href="#common-failure-mode" id="toc-common-failure-mode" class="nav-link" data-scroll-target="#common-failure-mode">Common failure mode</a></li>
   <li><a href="#stellar-library-compression" id="toc-stellar-library-compression" class="nav-link" data-scroll-target="#stellar-library-compression">Stellar library compression</a></li>
   </ul>
 </nav>
@@ -274,24 +273,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">wavelength =</span> real_demo<span class="sc">$</span>wavelength</span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section>
-<section id="common-failure-mode" class="level2">
-<h2 class="anchored" data-anchor-id="common-failure-mode">Common failure mode</h2>
-<p>If reconstructed spectra look almost identical across the cube and only the intensity changes, the fit has effectively collapsed toward a rank-1 solution or toward several nearly identical components. In practice this usually means one or more of the following:</p>
-<ul>
-<li>the input cube is dominated by a single continuum shape</li>
-<li><code>lambda_smooth</code> is too large and forces spectra to become too similar</li>
-<li><code>k</code> is too small, or the optimization has converged to a poor local minimum</li>
-<li>the data need preprocessing such as continuum normalization, masking, or rest-frame alignment before factorization</li>
-</ul>
-<p>Useful checks are:</p>
-<ul>
-<li>plot the recovered component spectra and see whether they are nearly identical</li>
-<li>inspect the loss curve with <code>plot(fit, type = "loss")</code></li>
-<li>retry with multiple values of <code>k</code></li>
-<li>reduce <code>lambda_smooth</code></li>
-<li>shift spectra to the rest frame before fitting when redshift varies</li>
-</ul>
 </section>
 <section id="stellar-library-compression" class="level2">
 <h2 class="anchored" data-anchor-id="stellar-library-compression">Stellar library compression</h2>

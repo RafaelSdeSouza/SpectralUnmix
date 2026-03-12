@@ -72,27 +72,6 @@ plot_reconstruction(
 )
 ```
 
-## Common failure mode
-
-If reconstructed spectra look almost identical across the cube and only the
-intensity changes, the fit has effectively collapsed toward a rank-1 solution
-or toward several nearly identical components. In practice this usually means
-one or more of the following:
-
-- the input cube is dominated by a single continuum shape
-- `lambda_smooth` is too large and forces spectra to become too similar
-- `k` is too small, or the optimization has converged to a poor local minimum
-- the data need preprocessing such as continuum normalization, masking, or
-  rest-frame alignment before factorization
-
-Useful checks are:
-
-- plot the recovered component spectra and see whether they are nearly identical
-- inspect the loss curve with `plot(fit, type = "loss")`
-- retry with multiple values of `k`
-- reduce `lambda_smooth`
-- shift spectra to the rest frame before fitting when redshift varies
-
 ## Stellar library compression
 
 ```{r}
