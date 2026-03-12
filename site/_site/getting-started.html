@@ -166,7 +166,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#simulated-example" id="toc-simulated-example" class="nav-link active" data-scroll-target="#simulated-example">Simulated example</a></li>
   <li><a href="#standard-interface" id="toc-standard-interface" class="nav-link" data-scroll-target="#standard-interface">Standard interface</a></li>
-  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a></li>
+  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots</a>
+  <ul class="collapse">
+  <li><a href="#example-figures" id="toc-example-figures" class="nav-link" data-scroll-target="#example-figures">Example figures</a></li>
+  </ul></li>
   <li><a href="#what-the-outputs-mean" id="toc-what-the-outputs-mean" class="nav-link" data-scroll-target="#what-the-outputs-mean">What the outputs mean</a></li>
   <li><a href="#real-library-example" id="toc-real-library-example" class="nav-link" data-scroll-target="#real-library-example">Real library example</a></li>
   <li><a href="#stellar-library-compression" id="toc-stellar-library-compression" class="nav-link" data-scroll-target="#stellar-library-compression">Stellar library compression</a></li>
@@ -228,6 +231,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">type =</span> <span class="st">"loss"</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reconstruction</span>(fit, demo<span class="sc">$</span>matrix, <span class="at">n =</span> <span class="dv">4</span>, <span class="at">wavelength =</span> demo<span class="sc">$</span>wavelength)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<section id="example-figures" class="level3">
+<h3 class="anchored" data-anchor-id="example-figures">Example figures</h3>
+<p>Component spectra:</p>
+<p><img src="images/simulated-spectra.png" class="img-fluid"></p>
+<p>Component maps:</p>
+<p><img src="images/simulated-maps.png" class="img-fluid"></p>
+<p>Observed versus reconstructed spectra:</p>
+<p><img src="images/simulated-reconstruction.png" class="img-fluid"></p>
+</section>
 </section>
 <section id="what-the-outputs-mean" class="level2">
 <h2 class="anchored" data-anchor-id="what-the-outputs-mean">What the outputs mean</h2>

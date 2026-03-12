@@ -37,6 +37,20 @@ plot(fit, type = "loss")
 plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
 ```
 
+### Example figures
+
+Component spectra:
+
+![](images/simulated-spectra.png)
+
+Component maps:
+
+![](images/simulated-maps.png)
+
+Observed versus reconstructed spectra:
+
+![](images/simulated-reconstruction.png)
+
 ## What the outputs mean
 
 - `fit$spatial` contains one abundance weight per spaxel and per component.

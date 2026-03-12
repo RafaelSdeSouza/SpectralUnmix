@@ -42,6 +42,13 @@ Each spaxel spectrum is modeled as a non-negative combination of a small number
 of latent spectral components. The abundances vary across the field, while the
 component spectra are shared across all spaxels.
 
+## Example output
+
+The figure below shows the component spectra recovered from the bundled
+synthetic example used throughout the documentation.
+
+![](images/simulated-spectra.png)
+
 ## Main functions
 
 - `spectral_unmix()` fits the model.

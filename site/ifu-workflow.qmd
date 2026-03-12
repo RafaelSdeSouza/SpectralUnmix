@@ -24,6 +24,10 @@ plot(fit, type = "maps", nx = dim(X$imDat)[1], ny = dim(X$imDat)[2])
 plot_reconstruction(fit, Mat, n = 6)
 ```
 
+Example spatial maps from the bundled synthetic cube:
+
+![](images/simulated-maps.png)
+
 ## Reconstruction outputs
 
 ```{r, eval = FALSE}

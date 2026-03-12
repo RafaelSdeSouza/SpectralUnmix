@@ -18,7 +18,7 @@
     "href": "ifu-workflow.html#fit-and-inspect",
     "title": "IFU Workflow",
     "section": "Fit and inspect",
-    "text": "Fit and inspect\n\nfit &lt;- spectral_unmix(Mat, k = 5, lr = 0.01, niter = 5000)\n\nplot(fit, type = \"spectra\")\nplot(fit, type = \"maps\", nx = dim(X$imDat)[1], ny = dim(X$imDat)[2])\nplot_reconstruction(fit, Mat, n = 6)"
+    "text": "Fit and inspect\n\nfit &lt;- spectral_unmix(Mat, k = 5, lr = 0.01, niter = 5000)\n\nplot(fit, type = \"spectra\")\nplot(fit, type = \"maps\", nx = dim(X$imDat)[1], ny = dim(X$imDat)[2])\nplot_reconstruction(fit, Mat, n = 6)\n\nExample spatial maps from the bundled synthetic cube:"
   },
   {
     "objectID": "ifu-workflow.html#reconstruction-outputs",
@@ -61,6 +61,13 @@
     "title": "SpectralUnmix",
     "section": "Interpretation",
     "text": "Interpretation\nEach spaxel spectrum is modeled as a non-negative combination of a small number of latent spectral components. The abundances vary across the field, while the component spectra are shared across all spaxels."
+  },
+  {
+    "objectID": "index.html#example-output",
+    "href": "index.html#example-output",
+    "title": "SpectralUnmix",
+    "section": "Example output",
+    "text": "Example output\nThe figure below shows the component spectra recovered from the bundled synthetic example used throughout the documentation."
   },
   {
     "objectID": "index.html#main-functions",
@@ -144,7 +151,7 @@
     "href": "getting-started.html#plots",
     "title": "Getting Started",
     "section": "Plots",
-    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)"
+    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)\n\n\nExample figures\nComponent spectra:\n\nComponent maps:\n\nObserved versus reconstructed spectra:"
   },
   {
     "objectID": "getting-started.html#what-the-outputs-mean",
