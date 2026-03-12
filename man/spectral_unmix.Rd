@@ -12,7 +12,8 @@ spectral_unmix(
   center = FALSE,
   scale = FALSE,
   cuda = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  metadata = NULL
 )
 
 \method{print}{spectral_unmix}(x, ...)
@@ -39,6 +40,9 @@ fitting.}
 
 \item{verbose}{Logical; if \code{TRUE}, emit progress every 100 iterations.}
 
+\item{metadata}{Optional metadata list to carry through the fitted object,
+reconstructed cubes, and prediction outputs.}
+
 \item{...}{Unused.}
 }
 \value{
@@ -52,6 +56,8 @@ A list with class \code{"spectral_unmix"} containing:
 \item \code{reconstruction}: reconstructed matrix \eqn{AS}.
 \item \code{fitted}: alias of \code{reconstruction}.
 \item \code{loss}: objective history over the optimization.
+\item \code{metadata}: optional metadata carried from the input matrix or
+provided explicitly.
 \item \code{center}: centering values used during preprocessing, or
 \code{FALSE}.
 \item \code{scale}: scaling values used during preprocessing, or

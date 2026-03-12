@@ -21,6 +21,27 @@ $$
 where `X` is a spaxel-by-wavelength matrix, `A` contains spatial abundances,
 and `S` contains component spectra.
 
+## Workflow
+
+```{mermaid}
+flowchart LR
+  A["IFU cube<br/>nx × ny × nλ"] --> B["cube_to_matrix()"]
+  B --> C["spaxel × wavelength matrix X"]
+  C --> D["spectral_unmix()"]
+  D --> E["A: abundance maps"]
+  D --> F["S: component spectra"]
+  D --> G["AS: reconstruction"]
+  E --> H["component_map()"]
+  F --> I["plot(type = 'spectra')"]
+  G --> J["predict(type = 'cube') / fitted()"]
+```
+
+## Interpretation
+
+Each spaxel spectrum is modeled as a non-negative combination of a small number
+of latent spectral components. The abundances vary across the field, while the
+component spectra are shared across all spaxels.
+
 ## Main functions
 
 - `spectral_unmix()` fits the model.
