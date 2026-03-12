@@ -933,17 +933,24 @@ plot_reconstruction <- function(fit, x, pixels = NULL, n = 6, wavelength = NULL,
       type = "l",
       lwd = 2,
       col = "black",
+      lty = 1,
       xlab = xlab,
       ylab = "Flux",
       main = sprintf("Spaxel %d", pixel),
       ...
     )
-    graphics::lines(wavelength, fit$reconstruction[pixel, ], col = "red", lwd = 2)
+    graphics::lines(
+      wavelength,
+      fit$reconstruction[pixel, ],
+      col = "red",
+      lwd = 2,
+      lty = 2
+    )
     graphics::legend(
       "topright",
       legend = c("data", "reconstruction"),
       col = c("black", "red"),
-      lty = 1,
+      lty = c(1, 2),
       bty = "n"
     )
   }

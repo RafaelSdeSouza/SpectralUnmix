@@ -86,6 +86,10 @@ plot_reconstruction(
 )
 ```
 
+Static reconstruction view for the Coelho demo sample:
+
+![](images/coelho-reconstruction.png)
+
 ## Stellar library compression
 
 ```{r}
