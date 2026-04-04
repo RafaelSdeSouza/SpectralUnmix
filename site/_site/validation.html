@@ -171,6 +171,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#controlled-benchmark" id="toc-controlled-benchmark" class="nav-link active" data-scroll-target="#controlled-benchmark">Controlled benchmark</a></li>
   <li><a href="#what-is-checked" id="toc-what-is-checked" class="nav-link" data-scroll-target="#what-is-checked">What is checked</a></li>
   <li><a href="#why-compare-to-nmf" id="toc-why-compare-to-nmf" class="nav-link" data-scroll-target="#why-compare-to-nmf">Why compare to <code>NMF</code></a></li>
+  <li><a href="#coelho-basis-benchmark" id="toc-coelho-basis-benchmark" class="nav-link" data-scroll-target="#coelho-basis-benchmark">Coelho basis benchmark</a></li>
   <li><a href="#running-the-validation-locally" id="toc-running-the-validation-locally" class="nav-link" data-scroll-target="#running-the-validation-locally">Running the validation locally</a></li>
   <li><a href="#interpreting-the-diagnostics" id="toc-interpreting-the-diagnostics" class="nav-link" data-scroll-target="#interpreting-the-diagnostics">Interpreting the diagnostics</a></li>
   </ul>
@@ -198,6 +199,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>coelho_summary_path <span class="ot">&lt;-</span> <span class="st">"data/coelho-basis-benchmark-summary.csv"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>coelho_bench <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">file.exists</span>(coelho_summary_path)) {</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read.csv</span>(coelho_summary_path, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <section id="controlled-benchmark" class="level2">
 <h2 class="anchored" data-anchor-id="controlled-benchmark">Controlled benchmark</h2>
 <p><code>SpectralUnmix</code> is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of <code>spectral_unmix()</code>.</p>
@@ -219,9 +228,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="why-compare-to-nmf">Why compare to <code>NMF</code></h2>
 <p>The <code>NMF</code> package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in <code>SpectralUnmix</code> is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top.</p>
 </section>
+<section id="coelho-basis-benchmark" class="level2">
+<h2 class="anchored" data-anchor-id="coelho-basis-benchmark">Coelho basis benchmark</h2>
+<p>The figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a realistic but controlled comparison in which the target basis is known.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(<span class="st">"images/coelho-basis-benchmark.png"</span>)) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"images/coelho-basis-benchmark.png"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="images/coelho-basis-benchmark.png" class="img-fluid figure-img" width="800"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(coelho_bench)) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  coelho_bench<span class="sc">$</span>reconstruction_mse <span class="ot">&lt;-</span> <span class="fu">signif</span>(coelho_bench<span class="sc">$</span>reconstruction_mse, <span class="dv">4</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  coelho_bench<span class="sc">$</span>basis_mse <span class="ot">&lt;-</span> <span class="fu">signif</span>(coelho_bench<span class="sc">$</span>basis_mse, <span class="dv">4</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(coelho_bench, <span class="at">caption =</span> <span class="st">"Coelho basis benchmark summary."</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"Coelho benchmark summary CSV not found.</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Coelho basis benchmark summary.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">method</th>
+<th style="text-align: right;">reconstruction_mse</th>
+<th style="text-align: right;">basis_mse</th>
+<th style="text-align: right;">iterations</th>
+<th style="text-align: left;">converged</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">SpectralUnmix</td>
+<td style="text-align: right;">1e-07</td>
+<td style="text-align: right;">0.001256</td>
+<td style="text-align: right;">2000</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NMF</td>
+<td style="text-align: right;">1e-07</td>
+<td style="text-align: right;">0.001300</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>On this benchmark, the normalized basis curves should overlap closely after component matching. They are not expected to be pixel-perfect:</p>
+<ul>
+<li>NMF solutions are only identifiable up to permutation and scaling.</li>
+<li><code>SpectralUnmix</code> and <code>NMF::nmf()</code> use different optimizers.</li>
+<li>once smoothness regularization is turned on, the two objectives are no longer the same.</li>
+</ul>
+</section>
 <section id="running-the-validation-locally" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-validation-locally">Running the validation locally</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">test</span>(<span class="at">filter =</span> <span class="st">"vanilla-nmf"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">test</span>(<span class="at">filter =</span> <span class="st">"vanilla-nmf"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The benchmark tests require both <code>torch</code> and <code>NMF</code>. If either package is not available in the local R environment, the corresponding tests are skipped.</p>
 </section>
 <section id="interpreting-the-diagnostics" class="level2">

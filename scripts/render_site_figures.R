@@ -80,7 +80,7 @@ reorder_fit <- function(fit, perm) {
   fit
 }
 
-simulate_coelho_basis_benchmark <- function(n_mixtures = 96, noise = 0.001, seed = 2026) {
+simulate_coelho_basis_benchmark <- function(n_mixtures = 96, noise = 0, seed = 2026) {
   real_demo_df <- utils::read.csv(
     "inst/extdata/coelho-demo-spectra.csv",
     check.names = FALSE
@@ -158,7 +158,12 @@ grDevices::png(
   height = 900,
   res = 180
 )
-plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
+plot_reconstruction(
+  fit,
+  demo$matrix,
+  pixels = as.integer(round(seq(1, nrow(demo$matrix), length.out = 4))),
+  wavelength = demo$wavelength
+)
 grDevices::dev.off()
 
 real_demo_df <- utils::read.csv(
@@ -209,7 +214,7 @@ if (!requireNamespace("NMF", quietly = TRUE)) {
 }
 suppressPackageStartupMessages(library(NMF))
 
-coelho_bench <- simulate_coelho_basis_benchmark(n_mixtures = 96, noise = 0.001, seed = 2026)
+coelho_bench <- simulate_coelho_basis_benchmark(n_mixtures = 96, noise = 0, seed = 2026)
 k <- nrow(coelho_bench$spectra)
 
 fit_coelho_su <- spectral_unmix(
@@ -219,8 +224,8 @@ fit_coelho_su <- spectral_unmix(
   init = "nndsvd",
   nstart = 5,
   seed = 2026,
-  niter = 1500,
-  lr = 0.03,
+  niter = 2000,
+  lr = 0.02,
   tol = 1e-7,
   patience = 50
 )
@@ -287,7 +292,8 @@ for (j in seq_len(k)) {
     lty = 1,
     xlab = "Wavelength",
     ylab = "Normalized flux",
-    main = sprintf("Basis %d: %s", j, rownames(coelho_bench$spectra)[j])
+    main = sprintf("Basis %d: %s", j, rownames(coelho_bench$spectra)[j]),
+    xlim = c(min(coelho_bench$wavelength), 1e4)
   )
   graphics::lines(
     coelho_bench$wavelength,

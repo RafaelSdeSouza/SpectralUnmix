@@ -186,14 +186,14 @@
     "href": "validation.html",
     "title": "Validation",
     "section": "",
-    "text": "SpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
+    "text": "coelho_summary_path &lt;- \"data/coelho-basis-benchmark-summary.csv\"\ncoelho_bench &lt;- if (file.exists(coelho_summary_path)) {\n  read.csv(coelho_summary_path, stringsAsFactors = FALSE)\n} else {\n  NULL\n}"
   },
   {
     "objectID": "validation.html#controlled-benchmark",
     "href": "validation.html#controlled-benchmark",
     "title": "Validation",
-    "section": "",
-    "text": "SpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
+    "section": "Controlled benchmark",
+    "text": "Controlled benchmark\nSpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
   },
   {
     "objectID": "validation.html#what-is-checked",
@@ -208,6 +208,13 @@
     "title": "Validation",
     "section": "Why compare to NMF",
     "text": "Why compare to NMF\nThe NMF package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in SpectralUnmix is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top."
+  },
+  {
+    "objectID": "validation.html#coelho-basis-benchmark",
+    "href": "validation.html#coelho-basis-benchmark",
+    "title": "Validation",
+    "section": "Coelho basis benchmark",
+    "text": "Coelho basis benchmark\nThe figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a realistic but controlled comparison in which the target basis is known.\n\nif (file.exists(\"images/coelho-basis-benchmark.png\")) {\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n} else {\n  cat(\"Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\\n\")\n}\n\n\n\n\n\n\n\n\n\nif (!is.null(coelho_bench)) {\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n} else {\n  cat(\"Coelho benchmark summary CSV not found.\\n\")\n}\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA\n\n\n\n\n\nOn this benchmark, the normalized basis curves should overlap closely after component matching. They are not expected to be pixel-perfect:\n\nNMF solutions are only identifiable up to permutation and scaling.\nSpectralUnmix and NMF::nmf() use different optimizers.\nonce smoothness regularization is turned on, the two objectives are no longer the same."
   },
   {
     "objectID": "validation.html#running-the-validation-locally",
