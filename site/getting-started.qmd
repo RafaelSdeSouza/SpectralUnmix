@@ -4,22 +4,33 @@ title: "Getting Started"
 
 ```{r}
 library(SpectralUnmix)
+demo <- coelho_demo_spectra()
 ```
 
-## Simulated example
+## Load the bundled spectra
+
+The bundled Coelho demo provides four normalized stellar spectra on a common
+wavelength grid. It is the simplest fully reproducible entry point for the
+package.
+
+```{r}
+dim(demo$matrix)
+demo$metadata
+```
+
+## Fit the model
 
 ```{r, eval = FALSE}
-demo <- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)
 fit <- spectral_unmix(
   demo$matrix,
-  k = 3,
-  lambda_smooth = 0.02,
-  niter = 300,
+  k = 4,
+  lambda_smooth = 0,
+  niter = 400,
   lr = 0.03
 )
 ```
 
-## Standard interface
+## Inspect the result
 
 ```{r, eval = FALSE}
 print(fit)
@@ -30,72 +41,34 @@ fit$niter_run
 fit$converged
 ```
 
-## Plots
+## Plot the spectra
 
 ```{r, eval = FALSE}
 plot(fit, type = "spectra", wavelength = demo$wavelength)
-plot(fit, type = "maps", nx = demo$nx, ny = demo$ny)
-plot(fit, type = "loss")
-plot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)
-```
-
-### Example figures
-
-Component spectra:
-
-![](images/simulated-spectra.png)
-
-Component maps:
-
-![](images/simulated-maps.png)
-
-Observed versus reconstructed spectra:
-
-![](images/simulated-reconstruction.png)
-
-## What the outputs mean
-
-- `fit$spatial` contains one abundance weight per spaxel and per component.
-- `fit$spectra` contains the recovered component spectra.
-- `fit$reconstruction` is the model approximation `A %*% S`.
-- `fit$loss` stores the optimization history used by `plot(fit, type = "loss")`.
-- `fit$niter_run` reports how many optimization steps were actually used.
-- `fit$converged` reports whether early stopping triggered before `niter`.
-- `fitted(fit, nx, ny)` and `predict(fit, type = "cube", nx, ny)` reshape that
-  reconstruction back into a cube.
-- `residuals(fit, x = ...)` returns data minus reconstruction.
-
-## Real library example
-
-```{r}
-real_demo <- coelho_demo_spectra()
-dim(real_demo$matrix)
-real_demo$metadata
-```
-
-```{r, eval = FALSE}
-fit_real <- spectral_unmix(
-  real_demo$matrix,
-  k = 3,
-  lambda_smooth = 0.001,
-  niter = 400,
-  lr = 0.03
-)
-
-plot(fit_real, type = "spectra", wavelength = real_demo$wavelength)
 plot_reconstruction(
-  fit_real,
-  real_demo$matrix,
-  n = 4,
-  wavelength = real_demo$wavelength
+  fit,
+  demo$matrix,
+  wavelength = demo$wavelength
 )
 ```
 
-Static reconstruction view for the Coelho demo sample:
+Recovered-versus-observed view for the bundled Coelho sample:
 
 ![](images/coelho-reconstruction.png)
 
-## Stellar library compression
+## What the outputs mean
+
+- `fit$spectra` contains the recovered component spectra.
+- `basis(fit)` returns those components as wavelength-by-component columns.
+- `fit$reconstruction` is the model approximation `A %*% S`.
+- `fit$loss` stores the optimization history.
+- `fit$niter_run` reports how many optimization steps were actually used.
+- `fit$converged` reports whether early stopping triggered before `niter`.
+
+## Larger library subset
+
+For a denser stellar-library example, use the curated Coelho subset bundled
+with the package.
 
 ```{r}
 stellar_lib <- coelho_stellar_subset()
@@ -113,10 +86,11 @@ fit_lib <- spectral_unmix(
 )
 
 plot(fit_lib, type = "spectra", wavelength = stellar_lib$wavelength)
-plot_reconstruction(
-  fit_lib,
-  stellar_lib$matrix,
-  n = 6,
-  wavelength = stellar_lib$wavelength
-)
 ```
+
+## IFU note
+
+The package still supports cube workflows through `cube_to_matrix()`,
+`matrix_to_cube()`, `predict(type = "cube")`, and `component_map()`. Those
+helpers are kept in the API, but the website examples stay focused on the
+bundled Coelho data so the documentation remains short and reproducible.

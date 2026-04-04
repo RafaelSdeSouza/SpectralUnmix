@@ -141,10 +141,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link active" href="./validation.html" aria-current="page"> 
 <span class="menu-text">Validation</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./ifu-workflow.html"> 
-<span class="menu-text">IFU Workflow</span></a>
-  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
@@ -168,10 +164,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#controlled-benchmark" id="toc-controlled-benchmark" class="nav-link active" data-scroll-target="#controlled-benchmark">Controlled benchmark</a></li>
+  <li><a href="#coelho-first-validation" id="toc-coelho-first-validation" class="nav-link active" data-scroll-target="#coelho-first-validation">Coelho-first validation</a></li>
+  <li><a href="#coelho-basis-benchmark" id="toc-coelho-basis-benchmark" class="nav-link" data-scroll-target="#coelho-basis-benchmark">Coelho basis benchmark</a></li>
   <li><a href="#what-is-checked" id="toc-what-is-checked" class="nav-link" data-scroll-target="#what-is-checked">What is checked</a></li>
   <li><a href="#why-compare-to-nmf" id="toc-why-compare-to-nmf" class="nav-link" data-scroll-target="#why-compare-to-nmf">Why compare to <code>NMF</code></a></li>
-  <li><a href="#coelho-basis-benchmark" id="toc-coelho-basis-benchmark" class="nav-link" data-scroll-target="#coelho-basis-benchmark">Coelho basis benchmark</a></li>
   <li><a href="#running-the-validation-locally" id="toc-running-the-validation-locally" class="nav-link" data-scroll-target="#running-the-validation-locally">Running the validation locally</a></li>
   <li><a href="#interpreting-the-diagnostics" id="toc-interpreting-the-diagnostics" class="nav-link" data-scroll-target="#interpreting-the-diagnostics">Interpreting the diagnostics</a></li>
   </ul>
@@ -207,30 +203,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="controlled-benchmark" class="level2">
-<h2 class="anchored" data-anchor-id="controlled-benchmark">Controlled benchmark</h2>
-<p><code>SpectralUnmix</code> is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of <code>spectral_unmix()</code>.</p>
-</section>
-<section id="what-is-checked" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-checked">What is checked</h2>
-<p>The package test suite currently verifies three things:</p>
-<ul>
-<li><code>spectral_unmix()</code> recovers a noise-free low-rank factorization with small reconstruction and component-spectrum error.</li>
-<li><code>spectral_unmix()</code> is competitive with <code>NMF::nmf(method = "lee")</code> on the same toy problem after matching fitted components to the reference ordering.</li>
-<li>early stopping and convergence bookkeeping are exposed through <code>loss</code>, <code>niter_run</code>, and <code>converged</code>.</li>
-</ul>
-<p>These checks live in:</p>
-<ul>
-<li><code>tests/testthat/test-vanilla-nmf-reference.R</code></li>
-</ul>
-</section>
-<section id="why-compare-to-nmf" class="level2">
-<h2 class="anchored" data-anchor-id="why-compare-to-nmf">Why compare to <code>NMF</code></h2>
-<p>The <code>NMF</code> package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in <code>SpectralUnmix</code> is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top.</p>
+<section id="coelho-first-validation" class="level2">
+<h2 class="anchored" data-anchor-id="coelho-first-validation">Coelho-first validation</h2>
+<p>The validation story on the website is centered on the bundled Coelho spectra. That keeps the example aligned with the research note while still checking the core matrix factorization behavior of <code>spectral_unmix()</code>.</p>
 </section>
 <section id="coelho-basis-benchmark" class="level2">
 <h2 class="anchored" data-anchor-id="coelho-basis-benchmark">Coelho basis benchmark</h2>
-<p>The figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a realistic but controlled comparison in which the target basis is known.</p>
+<p>The figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a controlled comparison in which the target basis is known and both <code>SpectralUnmix</code> and <code>NMF::nmf()</code> can be compared on the same problem.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(<span class="st">"images/coelho-basis-benchmark.png"</span>)) {</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"images/coelho-basis-benchmark.png"</span>)</span>
@@ -284,12 +263,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </div>
 </div>
-<p>On this benchmark, the normalized basis curves should overlap closely after component matching. They are not expected to be pixel-perfect:</p>
+<p>For this benchmark, the meaningful comparison is after component matching and normalization. The curves should lie close to one another, but exact equality is not expected because:</p>
 <ul>
 <li>NMF solutions are only identifiable up to permutation and scaling.</li>
 <li><code>SpectralUnmix</code> and <code>NMF::nmf()</code> use different optimizers.</li>
 <li>once smoothness regularization is turned on, the two objectives are no longer the same.</li>
 </ul>
+</section>
+<section id="what-is-checked" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-checked">What is checked</h2>
+<p>The package test suite currently verifies three things:</p>
+<ul>
+<li><code>spectral_unmix()</code> recovers a noise-free low-rank factorization with small reconstruction and component-spectrum error.</li>
+<li><code>spectral_unmix()</code> is competitive with <code>NMF::nmf(method = "lee")</code> on the same toy problem after matching fitted components to the reference ordering.</li>
+<li>early stopping and convergence bookkeeping are exposed through <code>loss</code>, <code>niter_run</code>, and <code>converged</code>.</li>
+</ul>
+<p>These checks live in:</p>
+<ul>
+<li><code>tests/testthat/test-vanilla-nmf-reference.R</code></li>
+</ul>
+</section>
+<section id="why-compare-to-nmf" class="level2">
+<h2 class="anchored" data-anchor-id="why-compare-to-nmf">Why compare to <code>NMF</code></h2>
+<p>The <code>NMF</code> package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in <code>SpectralUnmix</code> is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top.</p>
 </section>
 <section id="running-the-validation-locally" class="level2">
 <h2 class="anchored" data-anchor-id="running-the-validation-locally">Running the validation locally</h2>

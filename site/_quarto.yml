@@ -14,8 +14,6 @@ website:
         text: Reference
       - href: validation.qmd
         text: Validation
-      - href: ifu-workflow.qmd
-        text: IFU Workflow
     right:
       - icon: github
         href: https://github.com/RafaelSdeSouza/SpectralUnmix

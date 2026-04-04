@@ -11,12 +11,45 @@ coelho_bench <- if (file.exists(coelho_summary_path)) {
 }
 ```
 
-## Controlled benchmark
+## Coelho-first validation
 
-`SpectralUnmix` is validated with a controlled low-rank benchmark that mirrors
-the basic NMF problem before any survey-specific complications are introduced.
-The synthetic data are exactly non-negative and exactly low-rank, so the test
-suite isolates the core factorization behavior of `spectral_unmix()`.
+The validation story on the website is centered on the bundled Coelho spectra.
+That keeps the example aligned with the research note while still checking the
+core matrix factorization behavior of `spectral_unmix()`.
+
+## Coelho basis benchmark
+
+The figure below uses the bundled Coelho demo spectra as the true basis, then
+generates a synthetic mixture matrix from them. That gives us a controlled
+comparison in which the target basis is known and both `SpectralUnmix` and
+`NMF::nmf()` can be compared on the same problem.
+
+```{r}
+if (file.exists("images/coelho-basis-benchmark.png")) {
+  knitr::include_graphics("images/coelho-basis-benchmark.png")
+} else {
+  cat("Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\n")
+}
+```
+
+```{r}
+if (!is.null(coelho_bench)) {
+  coelho_bench$reconstruction_mse <- signif(coelho_bench$reconstruction_mse, 4)
+  coelho_bench$basis_mse <- signif(coelho_bench$basis_mse, 4)
+  knitr::kable(coelho_bench, caption = "Coelho basis benchmark summary.")
+} else {
+  cat("Coelho benchmark summary CSV not found.\n")
+}
+```
+
+For this benchmark, the meaningful comparison is after component matching and
+normalization. The curves should lie close to one another, but exact equality
+is not expected because:
+
+- NMF solutions are only identifiable up to permutation and scaling.
+- `SpectralUnmix` and `NMF::nmf()` use different optimizers.
+- once smoothness regularization is turned on, the two objectives are no longer
+  the same.
 
 ## What is checked
 
@@ -40,38 +73,6 @@ factorization problem. Matching that reference behavior on a simple benchmark
 gives us confidence that the torch-based optimizer in `SpectralUnmix` is
 recovering the expected NMF structure before smoothness regularization or IFU
 data handling are layered on top.
-
-## Coelho basis benchmark
-
-The figure below uses the bundled Coelho demo spectra as the true basis, then
-generates a synthetic mixture matrix from them. That gives us a realistic but
-controlled comparison in which the target basis is known.
-
-```{r}
-if (file.exists("images/coelho-basis-benchmark.png")) {
-  knitr::include_graphics("images/coelho-basis-benchmark.png")
-} else {
-  cat("Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\n")
-}
-```
-
-```{r}
-if (!is.null(coelho_bench)) {
-  coelho_bench$reconstruction_mse <- signif(coelho_bench$reconstruction_mse, 4)
-  coelho_bench$basis_mse <- signif(coelho_bench$basis_mse, 4)
-  knitr::kable(coelho_bench, caption = "Coelho basis benchmark summary.")
-} else {
-  cat("Coelho benchmark summary CSV not found.\n")
-}
-```
-
-On this benchmark, the normalized basis curves should overlap closely after
-component matching. They are not expected to be pixel-perfect:
-
-- NMF solutions are only identifiable up to permutation and scaling.
-- `SpectralUnmix` and `NMF::nmf()` use different optimizers.
-- once smoothness regularization is turned on, the two objectives are no longer
-  the same.
 
 ## Running the validation locally
 

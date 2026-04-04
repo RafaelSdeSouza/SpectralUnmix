@@ -2,6 +2,8 @@
   --su-accent: #0c5c7a;
   --su-accent-dark: #083d52;
   --su-sand: #f6f3ed;
+  --su-ink: #24323a;
+  --su-border: #d7d2c7;
 }
 
 .navbar {
@@ -17,4 +19,24 @@
   border-left: 4px solid var(--su-accent);
   background: var(--su-sand);
   margin: 1.25rem 0;
+  border-radius: 0.35rem;
+}
+
+body {
+  color: var(--su-ink);
+}
+
+.quarto-container img,
+main img {
+  border: 1px solid var(--su-border);
+  border-radius: 0.4rem;
+  background: white;
+}
+
+.content main {
+  line-height: 1.7;
+}
+
+h2, h3 {
+  letter-spacing: 0.01em;
 }

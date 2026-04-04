@@ -39,49 +39,56 @@
     "href": "getting-started.html",
     "title": "Getting Started",
     "section": "",
-    "text": "library(SpectralUnmix)"
+    "text": "library(SpectralUnmix)\ndemo &lt;- coelho_demo_spectra()"
   },
   {
-    "objectID": "getting-started.html#simulated-example",
-    "href": "getting-started.html#simulated-example",
+    "objectID": "getting-started.html#load-the-bundled-spectra",
+    "href": "getting-started.html#load-the-bundled-spectra",
     "title": "Getting Started",
-    "section": "Simulated example",
-    "text": "Simulated example\n\ndemo &lt;- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 3,\n  lambda_smooth = 0.02,\n  niter = 300,\n  lr = 0.03\n)"
+    "section": "Load the bundled spectra",
+    "text": "Load the bundled spectra\nThe bundled Coelho demo provides four normalized stellar spectra on a common wavelength grid. It is the simplest fully reproducible entry point for the package.\n\ndim(demo$matrix)\n\n[1]    4 2250\n\ndemo$metadata\n\n           id                         file  teff logg feh\n1  cool_giant t03000_g-0.5_p00p00_sed.fits  3000 -0.5 0.0\n2 solar_dwarf t05750_g+4.5_p00p04_sed.fits  5750  4.5 0.0\n3      a_star t09000_g+4.5_p00p00_sed.fits  9000  4.5 0.0\n4    hot_star t18000_g+4.5_p02p00_sed.fits 18000  4.5 0.2"
   },
   {
-    "objectID": "getting-started.html#standard-interface",
-    "href": "getting-started.html#standard-interface",
+    "objectID": "getting-started.html#fit-the-model",
+    "href": "getting-started.html#fit-the-model",
     "title": "Getting Started",
-    "section": "Standard interface",
-    "text": "Standard interface\n\nprint(fit)\nsummary(fit)\nbasis(fit)\ncoef(fit)\nfit$niter_run\nfit$converged"
+    "section": "Fit the model",
+    "text": "Fit the model\n\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 4,\n  lambda_smooth = 0,\n  niter = 400,\n  lr = 0.03\n)"
   },
   {
-    "objectID": "getting-started.html#plots",
-    "href": "getting-started.html#plots",
+    "objectID": "getting-started.html#inspect-the-result",
+    "href": "getting-started.html#inspect-the-result",
     "title": "Getting Started",
-    "section": "Plots",
-    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)\n\n\nExample figures\nComponent spectra:\n\nComponent maps:\n\nObserved versus reconstructed spectra:"
+    "section": "Inspect the result",
+    "text": "Inspect the result\n\nprint(fit)\nsummary(fit)\nbasis(fit)\ncoef(fit)\nfit$niter_run\nfit$converged"
+  },
+  {
+    "objectID": "getting-started.html#plot-the-spectra",
+    "href": "getting-started.html#plot-the-spectra",
+    "title": "Getting Started",
+    "section": "Plot the spectra",
+    "text": "Plot the spectra\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot_reconstruction(\n  fit,\n  demo$matrix,\n  wavelength = demo$wavelength\n)\n\nRecovered-versus-observed view for the bundled Coelho sample:"
   },
   {
     "objectID": "getting-started.html#what-the-outputs-mean",
     "href": "getting-started.html#what-the-outputs-mean",
     "title": "Getting Started",
     "section": "What the outputs mean",
-    "text": "What the outputs mean\n\nfit$spatial contains one abundance weight per spaxel and per component.\nfit$spectra contains the recovered component spectra.\nfit$reconstruction is the model approximation A %*% S.\nfit$loss stores the optimization history used by plot(fit, type = \"loss\").\nfit$niter_run reports how many optimization steps were actually used.\nfit$converged reports whether early stopping triggered before niter.\nfitted(fit, nx, ny) and predict(fit, type = \"cube\", nx, ny) reshape that reconstruction back into a cube.\nresiduals(fit, x = ...) returns data minus reconstruction."
+    "text": "What the outputs mean\n\nfit$spectra contains the recovered component spectra.\nbasis(fit) returns those components as wavelength-by-component columns.\nfit$reconstruction is the model approximation A %*% S.\nfit$loss stores the optimization history.\nfit$niter_run reports how many optimization steps were actually used.\nfit$converged reports whether early stopping triggered before niter."
   },
   {
-    "objectID": "getting-started.html#real-library-example",
-    "href": "getting-started.html#real-library-example",
+    "objectID": "getting-started.html#larger-library-subset",
+    "href": "getting-started.html#larger-library-subset",
     "title": "Getting Started",
-    "section": "Real library example",
-    "text": "Real library example\n\nreal_demo &lt;- coelho_demo_spectra()\ndim(real_demo$matrix)\n\n[1]    4 2250\n\nreal_demo$metadata\n\n           id                         file  teff logg feh\n1  cool_giant t03000_g-0.5_p00p00_sed.fits  3000 -0.5 0.0\n2 solar_dwarf t05750_g+4.5_p00p04_sed.fits  5750  4.5 0.0\n3      a_star t09000_g+4.5_p00p00_sed.fits  9000  4.5 0.0\n4    hot_star t18000_g+4.5_p02p00_sed.fits 18000  4.5 0.2\n\n\n\nfit_real &lt;- spectral_unmix(\n  real_demo$matrix,\n  k = 3,\n  lambda_smooth = 0.001,\n  niter = 400,\n  lr = 0.03\n)\n\nplot(fit_real, type = \"spectra\", wavelength = real_demo$wavelength)\nplot_reconstruction(\n  fit_real,\n  real_demo$matrix,\n  n = 4,\n  wavelength = real_demo$wavelength\n)\n\nStatic reconstruction view for the Coelho demo sample:"
+    "section": "Larger library subset",
+    "text": "Larger library subset\nFor a denser stellar-library example, use the curated Coelho subset bundled with the package.\n\nstellar_lib &lt;- coelho_stellar_subset()\ndim(stellar_lib$matrix)\n\n[1]  100 2250\n\ntable(stellar_lib$metadata$type)\n\n\n  a_f_star cool_dwarf cool_giant   hot_star solar_like \n        20         20         20         20         20 \n\n\n\nfit_lib &lt;- spectral_unmix(\n  stellar_lib$matrix,\n  k = 5,\n  lambda_smooth = 0.001,\n  niter = 500,\n  lr = 0.03\n)\n\nplot(fit_lib, type = \"spectra\", wavelength = stellar_lib$wavelength)"
   },
   {
-    "objectID": "getting-started.html#stellar-library-compression",
-    "href": "getting-started.html#stellar-library-compression",
+    "objectID": "getting-started.html#ifu-note",
+    "href": "getting-started.html#ifu-note",
     "title": "Getting Started",
-    "section": "Stellar library compression",
-    "text": "Stellar library compression\n\nstellar_lib &lt;- coelho_stellar_subset()\ndim(stellar_lib$matrix)\n\n[1]  100 2250\n\ntable(stellar_lib$metadata$type)\n\n\n  a_f_star cool_dwarf cool_giant   hot_star solar_like \n        20         20         20         20         20 \n\n\n\nfit_lib &lt;- spectral_unmix(\n  stellar_lib$matrix,\n  k = 5,\n  lambda_smooth = 0.001,\n  niter = 500,\n  lr = 0.03\n)\n\nplot(fit_lib, type = \"spectra\", wavelength = stellar_lib$wavelength)\nplot_reconstruction(\n  fit_lib,\n  stellar_lib$matrix,\n  n = 6,\n  wavelength = stellar_lib$wavelength\n)"
+    "section": "IFU note",
+    "text": "IFU note\nThe package still supports cube workflows through cube_to_matrix(), matrix_to_cube(), predict(type = \"cube\"), and component_map(). Those helpers are kept in the API, but the website examples stay focused on the bundled Coelho data so the documentation remains short and reproducible."
   },
   {
     "objectID": "reference.html",
@@ -140,39 +147,46 @@
     "text": "Model\nThe package solves\n\\[\nX \\approx A S\n\\]\nwhere X is a spaxel-by-wavelength matrix, A contains spatial abundances, and S contains component spectra."
   },
   {
-    "objectID": "index.html#workflow",
-    "href": "index.html#workflow",
+    "objectID": "index.html#minimal-workflow",
+    "href": "index.html#minimal-workflow",
     "title": "SpectralUnmix",
-    "section": "Workflow",
-    "text": "Workflow\n\nflowchart LR\n  A[\"IFU cube&lt;br/&gt;nx × ny × nλ\"] --&gt; B[\"cube_to_matrix()\"]\n  B --&gt; C[\"spaxel × wavelength matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"A: abundance maps\"]\n  D --&gt; F[\"S: component spectra\"]\n  D --&gt; G[\"AS: reconstruction\"]\n  E --&gt; H[\"component_map()\"]\n  F --&gt; I[\"plot(type = 'spectra')\"]\n  G --&gt; J[\"predict(type = 'cube') / fitted()\"]\n\n\n\n\nflowchart LR\n  A[\"IFU cube&lt;br/&gt;nx × ny × nλ\"] --&gt; B[\"cube_to_matrix()\"]\n  B --&gt; C[\"spaxel × wavelength matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"A: abundance maps\"]\n  D --&gt; F[\"S: component spectra\"]\n  D --&gt; G[\"AS: reconstruction\"]\n  E --&gt; H[\"component_map()\"]\n  F --&gt; I[\"plot(type = 'spectra')\"]\n  G --&gt; J[\"predict(type = 'cube') / fitted()\"]"
+    "section": "Minimal workflow",
+    "text": "Minimal workflow\n\nflowchart LR\n  A[\"Coelho demo spectra\"] --&gt; B[\"coelho_demo_spectra()\"]\n  B --&gt; C[\"spectral matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"component spectra\"]\n  D --&gt; F[\"reconstruction\"]\n  E --&gt; G[\"basis() / plot(type = 'spectra')\"]\n  F --&gt; H[\"plot_reconstruction()\"]\n\n\n\n\nflowchart LR\n  A[\"Coelho demo spectra\"] --&gt; B[\"coelho_demo_spectra()\"]\n  B --&gt; C[\"spectral matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"component spectra\"]\n  D --&gt; F[\"reconstruction\"]\n  E --&gt; G[\"basis() / plot(type = 'spectra')\"]\n  F --&gt; H[\"plot_reconstruction()\"]"
   },
   {
     "objectID": "index.html#interpretation",
     "href": "index.html#interpretation",
     "title": "SpectralUnmix",
     "section": "Interpretation",
-    "text": "Interpretation\nEach spaxel spectrum is modeled as a non-negative combination of a small number of latent spectral components. The abundances vary across the field, while the component spectra are shared across all spaxels."
+    "text": "Interpretation\nEach input spectrum is modeled as a non-negative combination of a small number of latent spectral components. In the Coelho demo, the goal is not spatial mapping but clean recovery of shared spectral structure from a compact library."
   },
   {
     "objectID": "index.html#example-output",
     "href": "index.html#example-output",
     "title": "SpectralUnmix",
     "section": "Example output",
-    "text": "Example output\nThe figure below shows the component spectra recovered from the bundled synthetic example used throughout the documentation."
+    "text": "Example output\nThe figure below shows the Coelho-based benchmark used in the validation page. The comparison is made on a controlled mixture benchmark built from the bundled stellar spectra."
+  },
+  {
+    "objectID": "index.html#reproducible-example",
+    "href": "index.html#reproducible-example",
+    "title": "SpectralUnmix",
+    "section": "Reproducible example",
+    "text": "Reproducible example\nlibrary(SpectralUnmix)\n\ndemo &lt;- coelho_demo_spectra()\n\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 4,\n  lambda_smooth = 0,\n  niter = 400,\n  lr = 0.03\n)\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot_reconstruction(fit, demo$matrix, wavelength = demo$wavelength)"
   },
   {
     "objectID": "index.html#main-functions",
     "href": "index.html#main-functions",
     "title": "SpectralUnmix",
     "section": "Main functions",
-    "text": "Main functions\n\nspectral_unmix() fits the model.\ncube_to_matrix() and matrix_to_cube() reshape IFU cubes.\nbasis() and coef() provide NMF-style accessors.\nfitted(), predict(), and residuals() provide standard model methods.\nplot() and plot_reconstruction() provide quick diagnostics."
+    "text": "Main functions\n\nspectral_unmix() fits the model.\nbasis() and coef() provide NMF-style accessors.\nfitted(), predict(), and residuals() provide standard model methods.\nplot() and plot_reconstruction() provide quick diagnostics.\ncube_to_matrix() and matrix_to_cube() remain available for IFU workflows."
   },
   {
     "objectID": "index.html#validation",
     "href": "index.html#validation",
     "title": "SpectralUnmix",
     "section": "Validation",
-    "text": "Validation\nThe package includes a validation workflow built around a noise-free low-rank toy problem. The test suite checks exact recovery, benchmark-level agreement with NMF::nmf(), and convergence diagnostics through loss, niter_run, and converged."
+    "text": "Validation\nThe validation page documents two complementary checks:\n\nbenchmark tests against NMF::nmf() for the baseline factorization behavior\na Coelho-based basis benchmark that compares normalized recovered components against known reference spectra"
   },
   {
     "objectID": "index.html#installation",
@@ -189,11 +203,18 @@
     "text": "coelho_summary_path &lt;- \"data/coelho-basis-benchmark-summary.csv\"\ncoelho_bench &lt;- if (file.exists(coelho_summary_path)) {\n  read.csv(coelho_summary_path, stringsAsFactors = FALSE)\n} else {\n  NULL\n}"
   },
   {
-    "objectID": "validation.html#controlled-benchmark",
-    "href": "validation.html#controlled-benchmark",
+    "objectID": "validation.html#coelho-first-validation",
+    "href": "validation.html#coelho-first-validation",
     "title": "Validation",
-    "section": "Controlled benchmark",
-    "text": "Controlled benchmark\nSpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
+    "section": "Coelho-first validation",
+    "text": "Coelho-first validation\nThe validation story on the website is centered on the bundled Coelho spectra. That keeps the example aligned with the research note while still checking the core matrix factorization behavior of spectral_unmix()."
+  },
+  {
+    "objectID": "validation.html#coelho-basis-benchmark",
+    "href": "validation.html#coelho-basis-benchmark",
+    "title": "Validation",
+    "section": "Coelho basis benchmark",
+    "text": "Coelho basis benchmark\nThe figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a controlled comparison in which the target basis is known and both SpectralUnmix and NMF::nmf() can be compared on the same problem.\n\nif (file.exists(\"images/coelho-basis-benchmark.png\")) {\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n} else {\n  cat(\"Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\\n\")\n}\n\n\n\n\n\n\n\n\n\nif (!is.null(coelho_bench)) {\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n} else {\n  cat(\"Coelho benchmark summary CSV not found.\\n\")\n}\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA\n\n\n\n\n\nFor this benchmark, the meaningful comparison is after component matching and normalization. The curves should lie close to one another, but exact equality is not expected because:\n\nNMF solutions are only identifiable up to permutation and scaling.\nSpectralUnmix and NMF::nmf() use different optimizers.\nonce smoothness regularization is turned on, the two objectives are no longer the same."
   },
   {
     "objectID": "validation.html#what-is-checked",
@@ -208,13 +229,6 @@
     "title": "Validation",
     "section": "Why compare to NMF",
     "text": "Why compare to NMF\nThe NMF package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in SpectralUnmix is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top."
-  },
-  {
-    "objectID": "validation.html#coelho-basis-benchmark",
-    "href": "validation.html#coelho-basis-benchmark",
-    "title": "Validation",
-    "section": "Coelho basis benchmark",
-    "text": "Coelho basis benchmark\nThe figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a realistic but controlled comparison in which the target basis is known.\n\nif (file.exists(\"images/coelho-basis-benchmark.png\")) {\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n} else {\n  cat(\"Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\\n\")\n}\n\n\n\n\n\n\n\n\n\nif (!is.null(coelho_bench)) {\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n} else {\n  cat(\"Coelho benchmark summary CSV not found.\\n\")\n}\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA\n\n\n\n\n\nOn this benchmark, the normalized basis curves should overlap closely after component matching. They are not expected to be pixel-perfect:\n\nNMF solutions are only identifiable up to permutation and scaling.\nSpectralUnmix and NMF::nmf() use different optimizers.\nonce smoothness regularization is turned on, the two objectives are no longer the same."
   },
   {
     "objectID": "validation.html#running-the-validation-locally",
