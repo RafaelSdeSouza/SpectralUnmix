@@ -144,28 +144,7 @@
     "href": "index.html#model",
     "title": "SpectralUnmix",
     "section": "Model",
-    "text": "Model\nThe package solves\n\\[\nX \\approx A S\n\\]\nwhere X is a spaxel-by-wavelength matrix, A contains spatial abundances, and S contains component spectra."
-  },
-  {
-    "objectID": "index.html#minimal-workflow",
-    "href": "index.html#minimal-workflow",
-    "title": "SpectralUnmix",
-    "section": "Minimal workflow",
-    "text": "Minimal workflow\n\nflowchart LR\n  A[\"Coelho demo spectra\"] --&gt; B[\"coelho_demo_spectra()\"]\n  B --&gt; C[\"spectral matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"component spectra\"]\n  D --&gt; F[\"reconstruction\"]\n  E --&gt; G[\"basis() / plot(type = 'spectra')\"]\n  F --&gt; H[\"plot_reconstruction()\"]\n\n\n\n\nflowchart LR\n  A[\"Coelho demo spectra\"] --&gt; B[\"coelho_demo_spectra()\"]\n  B --&gt; C[\"spectral matrix X\"]\n  C --&gt; D[\"spectral_unmix()\"]\n  D --&gt; E[\"component spectra\"]\n  D --&gt; F[\"reconstruction\"]\n  E --&gt; G[\"basis() / plot(type = 'spectra')\"]\n  F --&gt; H[\"plot_reconstruction()\"]"
-  },
-  {
-    "objectID": "index.html#interpretation",
-    "href": "index.html#interpretation",
-    "title": "SpectralUnmix",
-    "section": "Interpretation",
-    "text": "Interpretation\nEach input spectrum is modeled as a non-negative combination of a small number of latent spectral components. In the Coelho demo, the goal is not spatial mapping but clean recovery of shared spectral structure from a compact library."
-  },
-  {
-    "objectID": "index.html#example-output",
-    "href": "index.html#example-output",
-    "title": "SpectralUnmix",
-    "section": "Example output",
-    "text": "Example output\nThe figure below shows the Coelho-based benchmark used in the validation page. The comparison is made on a controlled mixture benchmark built from the bundled stellar spectra."
+    "text": "Model\nThe package solves\n\\[ X \\approx A S\\]\nwhere X is a spaxel-by-wavelength matrix, A contains spatial abundances, and S contains component spectra.\nEach input spectrum is modeled as a non-negative combination of a small number of latent spectral components. ## Output example\nThe figure below shows the Coelho-based benchmark used in the validation page. The comparison is made on a controlled mixture benchmark built from the bundled stellar spectra."
   },
   {
     "objectID": "index.html#reproducible-example",
@@ -182,13 +161,6 @@
     "text": "Main functions\n\nspectral_unmix() fits the model.\nbasis() and coef() provide NMF-style accessors.\nfitted(), predict(), and residuals() provide standard model methods.\nplot() and plot_reconstruction() provide quick diagnostics.\ncube_to_matrix() and matrix_to_cube() remain available for IFU workflows."
   },
   {
-    "objectID": "index.html#validation",
-    "href": "index.html#validation",
-    "title": "SpectralUnmix",
-    "section": "Validation",
-    "text": "Validation\nThe validation page documents two complementary checks:\n\nbenchmark tests against NMF::nmf() for the baseline factorization behavior\na Coelho-based basis benchmark that compares normalized recovered components against known reference spectra"
-  },
-  {
     "objectID": "index.html#installation",
     "href": "index.html#installation",
     "title": "SpectralUnmix",
@@ -198,50 +170,29 @@
   {
     "objectID": "validation.html",
     "href": "validation.html",
-    "title": "Validation",
+    "title": "SpectralUnmix",
     "section": "",
-    "text": "coelho_summary_path &lt;- \"data/coelho-basis-benchmark-summary.csv\"\ncoelho_bench &lt;- if (file.exists(coelho_summary_path)) {\n  read.csv(coelho_summary_path, stringsAsFactors = FALSE)\n} else {\n  NULL\n}"
+    "text": "The figure below uses the bundled demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a controlled comparison in which the target basis is known and both SpectralUnmix and NMF::nmf() can be compared on the same problem.\n\ncoelho_summary_path &lt;- \"data/coelho-basis-benchmark-summary.csv\"\ncoelho_bench &lt;- read.csv(coelho_summary_path, stringsAsFactors = FALSE)\n\n\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n\n\n\n\n\n\n\n\n\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA"
   },
   {
-    "objectID": "validation.html#coelho-first-validation",
-    "href": "validation.html#coelho-first-validation",
-    "title": "Validation",
-    "section": "Coelho-first validation",
-    "text": "Coelho-first validation\nThe validation story on the website is centered on the bundled Coelho spectra. That keeps the example aligned with the research note while still checking the core matrix factorization behavior of spectral_unmix()."
+    "objectID": "validation.html#spectral-basis-benchmark",
+    "href": "validation.html#spectral-basis-benchmark",
+    "title": "SpectralUnmix",
+    "section": "",
+    "text": "The figure below uses the bundled demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a controlled comparison in which the target basis is known and both SpectralUnmix and NMF::nmf() can be compared on the same problem.\n\ncoelho_summary_path &lt;- \"data/coelho-basis-benchmark-summary.csv\"\ncoelho_bench &lt;- read.csv(coelho_summary_path, stringsAsFactors = FALSE)\n\n\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n\n\n\n\n\n\n\n\n\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA"
   },
   {
-    "objectID": "validation.html#coelho-basis-benchmark",
-    "href": "validation.html#coelho-basis-benchmark",
-    "title": "Validation",
-    "section": "Coelho basis benchmark",
-    "text": "Coelho basis benchmark\nThe figure below uses the bundled Coelho demo spectra as the true basis, then generates a synthetic mixture matrix from them. That gives us a controlled comparison in which the target basis is known and both SpectralUnmix and NMF::nmf() can be compared on the same problem.\n\nif (file.exists(\"images/coelho-basis-benchmark.png\")) {\n  knitr::include_graphics(\"images/coelho-basis-benchmark.png\")\n} else {\n  cat(\"Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\\n\")\n}\n\n\n\n\n\n\n\n\n\nif (!is.null(coelho_bench)) {\n  coelho_bench$reconstruction_mse &lt;- signif(coelho_bench$reconstruction_mse, 4)\n  coelho_bench$basis_mse &lt;- signif(coelho_bench$basis_mse, 4)\n  knitr::kable(coelho_bench, caption = \"Coelho basis benchmark summary.\")\n} else {\n  cat(\"Coelho benchmark summary CSV not found.\\n\")\n}\n\n\nCoelho basis benchmark summary.\n\n\nmethod\nreconstruction_mse\nbasis_mse\niterations\nconverged\n\n\n\n\nSpectralUnmix\n1e-07\n0.001256\n2000\nFALSE\n\n\nNMF\n1e-07\n0.001300\nNA\nNA\n\n\n\n\n\nFor this benchmark, the meaningful comparison is after component matching and normalization. The curves should lie close to one another, but exact equality is not expected because:\n\nNMF solutions are only identifiable up to permutation and scaling.\nSpectralUnmix and NMF::nmf() use different optimizers.\nonce smoothness regularization is turned on, the two objectives are no longer the same."
-  },
-  {
-    "objectID": "validation.html#what-is-checked",
-    "href": "validation.html#what-is-checked",
-    "title": "Validation",
-    "section": "What is checked",
-    "text": "What is checked\nThe package test suite currently verifies three things:\n\nspectral_unmix() recovers a noise-free low-rank factorization with small reconstruction and component-spectrum error.\nspectral_unmix() is competitive with NMF::nmf(method = \"lee\") on the same toy problem after matching fitted components to the reference ordering.\nearly stopping and convergence bookkeeping are exposed through loss, niter_run, and converged.\n\nThese checks live in:\n\ntests/testthat/test-vanilla-nmf-reference.R"
-  },
-  {
-    "objectID": "validation.html#why-compare-to-nmf",
-    "href": "validation.html#why-compare-to-nmf",
-    "title": "Validation",
-    "section": "Why compare to NMF",
-    "text": "Why compare to NMF\nThe NMF package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in SpectralUnmix is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top."
-  },
-  {
-    "objectID": "validation.html#running-the-validation-locally",
-    "href": "validation.html#running-the-validation-locally",
-    "title": "Validation",
-    "section": "Running the validation locally",
-    "text": "Running the validation locally\ndevtools::test(filter = \"vanilla-nmf\")\nThe benchmark tests require both torch and NMF. If either package is not available in the local R environment, the corresponding tests are skipped."
+    "objectID": "validation.html#what-we-are-testing-here",
+    "href": "validation.html#what-we-are-testing-here",
+    "title": "SpectralUnmix",
+    "section": "What we are testing here",
+    "text": "What we are testing here\nThe test suite verifies three things:\n\nspectral_unmix() recovers a noise-free low-rank factorization with small reconstruction and component-spectrum error.\nspectral_unmix() is competitive with NMF::nmf(method = \"lee\") on the same toy problem after matching fitted components to the reference ordering.\nearly stopping and convergence bookkeeping are exposed through loss, niter_run, and converged."
   },
   {
     "objectID": "validation.html#interpreting-the-diagnostics",
     "href": "validation.html#interpreting-the-diagnostics",
-    "title": "Validation",
+    "title": "SpectralUnmix",
     "section": "Interpreting the diagnostics",
-    "text": "Interpreting the diagnostics\n\nfit$loss is the optimization history.\nfit$niter_run is the number of iterations actually executed.\nfit$converged indicates whether early stopping triggered before the maximum iteration budget.\n\nFor practical work, the benchmark is intended as a sanity check. Good behavior here means the core factorization engine is behaving as expected; difficult real-data fits can then be investigated as modeling or preprocessing issues rather than as a basic failure of the package optimizer."
+    "text": "Interpreting the diagnostics\n\nfit$loss is the optimization history.\nfit$niter_run is the number of iterations actually executed.\nfit$converged indicates whether early stopping triggered before the maximum iteration budget."
   }
 ]

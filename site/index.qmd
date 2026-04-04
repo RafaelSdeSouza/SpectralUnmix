@@ -5,42 +5,18 @@ title: "SpectralUnmix"
 `SpectralUnmix` is an R package for smooth non-negative spectral unmixing of
 hyperspectral datasets and astronomical IFU cubes.
 
-::: {.hero-note}
-The documentation is centered on the bundled Coelho stellar spectra so the
-main example is compact, reproducible, and aligned with the research note.
-:::
-
 ## Model
 
 The package solves
 
-$$
-X \approx A S
-$$
+$$ X \approx A S$$
 
 where `X` is a spaxel-by-wavelength matrix, `A` contains spatial abundances,
 and `S` contains component spectra.
 
-## Minimal workflow
-
-```{mermaid}
-flowchart LR
-  A["Coelho demo spectra"] --> B["coelho_demo_spectra()"]
-  B --> C["spectral matrix X"]
-  C --> D["spectral_unmix()"]
-  D --> E["component spectra"]
-  D --> F["reconstruction"]
-  E --> G["basis() / plot(type = 'spectra')"]
-  F --> H["plot_reconstruction()"]
-```
-
-## Interpretation
-
 Each input spectrum is modeled as a non-negative combination of a small number
-of latent spectral components. In the Coelho demo, the goal is not spatial
-mapping but clean recovery of shared spectral structure from a compact library.
-
-## Example output
+of latent spectral components. 
+## Output example
 
 The figure below shows the Coelho-based benchmark used in the validation page.
 The comparison is made on a controlled mixture benchmark built from the bundled
@@ -75,13 +51,6 @@ plot_reconstruction(fit, demo$matrix, wavelength = demo$wavelength)
 - `plot()` and `plot_reconstruction()` provide quick diagnostics.
 - `cube_to_matrix()` and `matrix_to_cube()` remain available for IFU workflows.
 
-## Validation
-
-The validation page documents two complementary checks:
-
-- benchmark tests against `NMF::nmf()` for the baseline factorization behavior
-- a Coelho-based basis benchmark that compares normalized recovered components
-  against known reference spectra
 
 ## Installation
 

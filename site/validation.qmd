@@ -1,59 +1,26 @@
----
-title: "Validation"
----
+## Spectral basis benchmark
 
-```{r}
-coelho_summary_path <- "data/coelho-basis-benchmark-summary.csv"
-coelho_bench <- if (file.exists(coelho_summary_path)) {
-  read.csv(coelho_summary_path, stringsAsFactors = FALSE)
-} else {
-  NULL
-}
-```
-
-## Coelho-first validation
-
-The validation story on the website is centered on the bundled Coelho spectra.
-That keeps the example aligned with the research note while still checking the
-core matrix factorization behavior of `spectral_unmix()`.
-
-## Coelho basis benchmark
-
-The figure below uses the bundled Coelho demo spectra as the true basis, then
+The figure below uses the bundled demo spectra as the true basis, then
 generates a synthetic mixture matrix from them. That gives us a controlled
 comparison in which the target basis is known and both `SpectralUnmix` and
 `NMF::nmf()` can be compared on the same problem.
-
 ```{r}
-if (file.exists("images/coelho-basis-benchmark.png")) {
+coelho_summary_path <- "data/coelho-basis-benchmark-summary.csv"
+coelho_bench <- read.csv(coelho_summary_path, stringsAsFactors = FALSE)
+```
+```{r}
   knitr::include_graphics("images/coelho-basis-benchmark.png")
-} else {
-  cat("Coelho benchmark figure not found in `site/images/coelho-basis-benchmark.png`.\n")
-}
 ```
 
 ```{r}
-if (!is.null(coelho_bench)) {
   coelho_bench$reconstruction_mse <- signif(coelho_bench$reconstruction_mse, 4)
   coelho_bench$basis_mse <- signif(coelho_bench$basis_mse, 4)
   knitr::kable(coelho_bench, caption = "Coelho basis benchmark summary.")
-} else {
-  cat("Coelho benchmark summary CSV not found.\n")
-}
 ```
 
-For this benchmark, the meaningful comparison is after component matching and
-normalization. The curves should lie close to one another, but exact equality
-is not expected because:
+## What we are testing here
 
-- NMF solutions are only identifiable up to permutation and scaling.
-- `SpectralUnmix` and `NMF::nmf()` use different optimizers.
-- once smoothness regularization is turned on, the two objectives are no longer
-  the same.
-
-## What is checked
-
-The package test suite currently verifies three things:
+The test suite  verifies three things:
 
 - `spectral_unmix()` recovers a noise-free low-rank factorization with small
   reconstruction and component-spectrum error.
@@ -62,26 +29,6 @@ The package test suite currently verifies three things:
 - early stopping and convergence bookkeeping are exposed through `loss`,
   `niter_run`, and `converged`.
 
-These checks live in:
-
-- `tests/testthat/test-vanilla-nmf-reference.R`
-
-## Why compare to `NMF`
-
-The `NMF` package is a natural baseline for the unregularized matrix
-factorization problem. Matching that reference behavior on a simple benchmark
-gives us confidence that the torch-based optimizer in `SpectralUnmix` is
-recovering the expected NMF structure before smoothness regularization or IFU
-data handling are layered on top.
-
-## Running the validation locally
-
-```r
-devtools::test(filter = "vanilla-nmf")
-```
-
-The benchmark tests require both `torch` and `NMF`. If either package is not
-available in the local R environment, the corresponding tests are skipped.
 
 ## Interpreting the diagnostics
 
@@ -90,7 +37,3 @@ available in the local R environment, the corresponding tests are skipped.
 - `fit$converged` indicates whether early stopping triggered before the maximum
   iteration budget.
 
-For practical work, the benchmark is intended as a sanity check. Good behavior
-here means the core factorization engine is behaving as expected; difficult
-real-data fits can then be investigated as modeling or preprocessing issues
-rather than as a basic failure of the package optimizer.
