@@ -442,6 +442,71 @@ simulate_ifu_cube <- function(nx = 20, ny = 20, n_wave = 120, noise = 0.01) {
   )
 }
 
+simulate_identifiable_nmf_toy <- function(nx = 20,
+                                          ny = 20,
+                                          n_wave = 120,
+                                          noise = 0,
+                                          eps = 1e-6) {
+  if (!is.numeric(nx) || !is.numeric(ny) || !is.numeric(n_wave) || !is.numeric(noise)) {
+    stop("All arguments must be numeric.", call. = FALSE)
+  }
+
+  nx <- as.integer(nx)
+  ny <- as.integer(ny)
+  n_wave <- as.integer(n_wave)
+
+  wavelength <- seq(3600, 7200, length.out = n_wave)
+  xgrid <- seq(-1, 1, length.out = nx)
+  ygrid <- seq(-1, 1, length.out = ny)
+  xy <- expand.grid(x = xgrid, y = ygrid)
+
+  gaussian2d <- function(x0, y0, sx, sy) {
+    exp(-0.5 * (((xy$x - x0) / sx)^2 + ((xy$y - y0) / sy)^2))
+  }
+  gaussian1d <- function(mu, sig) {
+    exp(-0.5 * ((wavelength - mu) / sig)^2)
+  }
+
+  m1 <- gaussian2d(-0.62, -0.55, 0.14, 0.16) * as.numeric(xy$x < -0.15 & xy$y < 0.05)
+  m2 <- gaussian2d(0.62, -0.52, 0.14, 0.16) * as.numeric(xy$x > 0.15 & xy$y < 0.05)
+  m3 <- gaussian2d(0.00, 0.58, 0.16, 0.14) * as.numeric(xy$y > 0.15)
+
+  abundance_mat <- cbind(m1, m2, m3) + eps
+  abundance_mat <- sweep(abundance_mat, 2, apply(abundance_mat, 2, max), `/`)
+
+  spectra <- rbind(
+    1.1 * exp(-0.00055 * (wavelength - min(wavelength))) +
+      0.22 * gaussian1d(3900, 120) + 0.04,
+    0.03 +
+      1.4 * gaussian1d(3727, 18) +
+      1.8 * gaussian1d(4861, 18) +
+      2.0 * gaussian1d(5007, 20) +
+      1.6 * gaussian1d(6563, 24),
+    0.04 +
+      1.1 * gaussian1d(4300, 90) +
+      1.5 * gaussian1d(6100, 170) +
+      1.2 * gaussian1d(6900, 120)
+  )
+
+  matrix_data <- abundance_mat %*% spectra
+  if (noise > 0) {
+    matrix_data <- matrix_data + stats::rnorm(length(matrix_data), sd = noise)
+  }
+  matrix_data[matrix_data < 0] <- 0
+
+  list(
+    cube = matrix_to_cube(matrix_data, nx = nx, ny = ny),
+    matrix = matrix_data,
+    spectra = spectra,
+    abundances = lapply(seq_len(ncol(abundance_mat)), function(i) {
+      matrix(abundance_mat[, i], nrow = nx, ncol = ny)
+    }),
+    wavelength = wavelength,
+    nx = nx,
+    ny = ny
+  )
+}
+
 #' Run the Built-in IFU Demonstration
 #'
 #' Generates a synthetic cube, fits the model, and optionally plots the result.

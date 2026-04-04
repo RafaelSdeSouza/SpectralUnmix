@@ -110,7 +110,7 @@ spectra_mse <- function(truth, fit) {
 test_that("spectral_unmix recovers an exact low-rank toy factorization", {
   skip_if_not_installed("torch")
 
-  toy <- simulate_ifu_cube(nx = 8, ny = 8, n_wave = 60, noise = 0)
+  toy <- simulate_identifiable_nmf_toy(nx = 8, ny = 8, n_wave = 60, noise = 0)
   fit_seeds <- c(11, 23, 37, 41, 53, 67)
 
   fit <- fit_best_spectral_unmix(
@@ -136,7 +136,7 @@ test_that("spectral_unmix is comparable to the NMF package on the same toy probl
   skip_if_not_installed("torch")
   skip_if_not_installed("NMF")
 
-  toy <- simulate_ifu_cube(nx = 8, ny = 8, n_wave = 60, noise = 0)
+  toy <- simulate_identifiable_nmf_toy(nx = 8, ny = 8, n_wave = 60, noise = 0)
   fit_seeds <- c(11, 23, 37, 41, 53, 67)
 
   fit_su <- fit_best_spectral_unmix(
@@ -165,7 +165,7 @@ test_that("spectral_unmix is comparable to the NMF package on the same toy probl
 test_that("spectral_unmix reports convergence diagnostics and supports early stopping", {
   skip_if_not_installed("torch")
 
-  toy <- simulate_ifu_cube(nx = 8, ny = 8, n_wave = 60, noise = 0)
+  toy <- simulate_identifiable_nmf_toy(nx = 8, ny = 8, n_wave = 60, noise = 0)
 
   set_all_seeds(101)
   fit_full <- spectral_unmix(
