@@ -16,6 +16,9 @@
 #'   penalty applied to the recovered spectra.
 #' @param lr Learning rate passed to \code{torch::optim_adam()}.
 #' @param niter Number of optimization iterations.
+#' @param tol Relative objective-improvement tolerance used for early stopping.
+#' @param patience Number of consecutive iterations with improvement below
+#'   \code{tol} before optimization stops early.
 #' @param center Logical; if \code{TRUE}, center wavelength channels before
 #'   fitting.
 #' @param scale Logical; if \code{TRUE}, scale wavelength channels before
@@ -35,6 +38,9 @@
 #'   \item \code{reconstruction}: reconstructed matrix \eqn{AS}.
 #'   \item \code{fitted}: alias of \code{reconstruction}.
 #'   \item \code{loss}: objective history over the optimization.
+#'   \item \code{niter_run}: number of iterations actually executed.
+#'   \item \code{converged}: logical flag indicating whether early-stopping
+#'     convergence was detected before \code{niter}.
 #'   \item \code{metadata}: optional metadata carried from the input matrix or
 #'     provided explicitly.
 #'   \item \code{center}: centering values used during preprocessing, or
@@ -77,6 +83,8 @@ spectral_unmix <- function(x,
                            lambda_smooth = 0.01,
                            lr = 0.02,
                            niter = 2000,
+                           tol = 1e-6,
+                           patience = 20,
                            center = FALSE,
                            scale = FALSE,
                            cuda = FALSE,
@@ -108,6 +116,13 @@ spectral_unmix <- function(x,
     stop("'niter' must be a positive integer.", call. = FALSE)
   }
   niter <- as.integer(niter)
+  if (!is.numeric(tol) || length(tol) != 1L || is.na(tol) || tol < 0) {
+    stop("'tol' must be a non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(patience) || length(patience) != 1L || is.na(patience) || patience < 1) {
+    stop("'patience' must be a positive integer.", call. = FALSE)
+  }
+  patience <- as.integer(patience)
 
   x <- base::scale(x, center = center, scale = scale)
   cen <- attr(x, "scaled:center")
@@ -125,46 +140,21 @@ spectral_unmix <- function(x,
   }
 
   device <- select_torch_device(cuda)
-  X <- torch::torch_tensor(as.matrix(x), device = device)
+  fit_core <- fit_spectral_unmix_adam(
+    x = x,
+    k = k,
+    lr = lr,
+    niter = niter,
+    tol = tol,
+    patience = patience,
+    lambda_smooth = lambda_smooth,
+    device = device,
+    verbose = verbose
+  )
 
-  n_spectra <- nrow(x)
-  n_wave <- ncol(x)
-
-  A <- torch::torch_rand(n_spectra, k, device = device, requires_grad = TRUE)
-  S <- torch::torch_rand(k, n_wave, device = device, requires_grad = TRUE)
-  opt <- torch::optim_adam(list(A, S), lr = lr)
-
-  loss_history <- numeric(niter)
-
-  for (i in seq_len(niter)) {
-    opt$zero_grad()
-
-    Xhat <- A$matmul(S)
-    recon <- torch::torch_mean((X - Xhat)^2)
-
-    if (n_wave > 1L) {
-      diff <- S[, 2:n_wave] - S[, 1:(n_wave - 1L)]
-      smooth <- torch::torch_mean(diff^2)
-    } else {
-      smooth <- torch::torch_tensor(0, device = device)
-    }
-
-    loss <- recon + lambda_smooth * smooth
-    loss$backward()
-    opt$step()
-
-    A$data()$clamp_(min = 0)
-    S$data()$clamp_(min = 0)
-
-    loss_history[i] <- as.numeric(loss$item())
-    if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
-      message(sprintf("Iteration %d/%d, loss = %.6f", i, niter, loss_history[i]))
-    }
-  }
-
-  spatial <- as.matrix(A$detach()$cpu())
-  spectra <- as.matrix(S$detach()$cpu())
-  reconstruction <- spatial %*% spectra
+  spatial <- fit_core$spatial
+  spectra <- fit_core$spectra
+  reconstruction <- fit_core$reconstruction
 
   fit <- list(
     spatial = spatial,
@@ -174,7 +164,9 @@ spectral_unmix <- function(x,
     coef = t(spatial),
     reconstruction = reconstruction,
     fitted = reconstruction,
-    loss = loss_history,
+    loss = fit_core$loss,
+    niter_run = fit_core$niter_run,
+    converged = fit_core$converged,
     metadata = input_metadata,
     center = if (is.null(cen)) FALSE else cen,
     scale = if (is.null(sc)) FALSE else sc,
@@ -1025,6 +1017,79 @@ extract_cube_metadata <- function(x) {
   }
 
   NULL
+}
+
+fit_spectral_unmix_adam <- function(x,
+                                    k,
+                                    lr,
+                                    niter,
+                                    tol,
+                                    patience,
+                                    lambda_smooth,
+                                    device,
+                                    verbose = FALSE) {
+  X <- torch::torch_tensor(as.matrix(x), device = device)
+  n_spectra <- nrow(x)
+  n_wave <- ncol(x)
+  A <- torch::torch_rand(n_spectra, k, device = device, requires_grad = TRUE)
+  S <- torch::torch_rand(k, n_wave, device = device, requires_grad = TRUE)
+  opt <- torch::optim_adam(list(A, S), lr = lr)
+  loss_history <- numeric(niter)
+  stale_steps <- 0L
+  converged <- FALSE
+
+  for (i in seq_len(niter)) {
+    opt$zero_grad()
+
+    Xhat <- A$matmul(S)
+    recon <- torch::torch_mean((X - Xhat)^2)
+
+    if (n_wave > 1L) {
+      diff <- S[, 2:n_wave] - S[, 1:(n_wave - 1L)]
+      smooth <- torch::torch_mean(diff^2)
+    } else {
+      smooth <- torch::torch_tensor(0, device = device)
+    }
+
+    loss <- recon + lambda_smooth * smooth
+    loss$backward()
+    opt$step()
+
+    A$data()$clamp_(min = 0)
+    S$data()$clamp_(min = 0)
+
+    loss_history[i] <- as.numeric(loss$item())
+    if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
+      message(sprintf("Iteration %d/%d, loss = %.6f", i, niter, loss_history[i]))
+    }
+
+    if (i > 1L) {
+      rel_improvement <- (loss_history[i - 1L] - loss_history[i]) / max(loss_history[i - 1L], 1e-12)
+      if (!is.finite(rel_improvement) || rel_improvement <= tol) {
+        stale_steps <- stale_steps + 1L
+      } else {
+        stale_steps <- 0L
+      }
+      if (stale_steps >= patience) {
+        converged <- TRUE
+        loss_history <- loss_history[seq_len(i)]
+        break
+      }
+    }
+  }
+
+  spatial <- as.matrix(A$detach()$cpu())
+  spectra <- as.matrix(S$detach()$cpu())
+  reconstruction <- spatial %*% spectra
+
+  list(
+    spatial = spatial,
+    spectra = spectra,
+    reconstruction = reconstruction,
+    loss = loss_history,
+    niter_run = length(loss_history),
+    converged = converged
+  )
 }
 
 extract_matrix_metadata <- function(x) {

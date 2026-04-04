@@ -21,8 +21,10 @@ Encoding: UTF-8
 Imports:
     torch
 Suggests:
+    NMF,
     knitr,
     rmarkdown,
+    testthat,
     viridis,
     ggplot2
 VignetteBuilder: knitr
