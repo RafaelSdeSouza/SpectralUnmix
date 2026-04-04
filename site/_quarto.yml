@@ -12,6 +12,8 @@ website:
         text: Getting Started
       - href: reference.qmd
         text: Reference
+      - href: validation.qmd
+        text: Validation
       - href: ifu-workflow.qmd
         text: IFU Workflow
     right:

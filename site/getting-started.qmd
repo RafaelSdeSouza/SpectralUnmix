@@ -26,6 +26,8 @@ print(fit)
 summary(fit)
 basis(fit)
 coef(fit)
+fit$niter_run
+fit$converged
 ```
 
 ## Plots
@@ -56,6 +58,9 @@ Observed versus reconstructed spectra:
 - `fit$spatial` contains one abundance weight per spaxel and per component.
 - `fit$spectra` contains the recovered component spectra.
 - `fit$reconstruction` is the model approximation `A %*% S`.
+- `fit$loss` stores the optimization history used by `plot(fit, type = "loss")`.
+- `fit$niter_run` reports how many optimization steps were actually used.
+- `fit$converged` reports whether early stopping triggered before `niter`.
 - `fitted(fit, nx, ny)` and `predict(fit, type = "cube", nx, ny)` reshape that
   reconstruction back into a cube.
 - `residuals(fit, x = ...)` returns data minus reconstruction.

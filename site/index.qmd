@@ -57,6 +57,13 @@ synthetic example used throughout the documentation.
 - `fitted()`, `predict()`, and `residuals()` provide standard model methods.
 - `plot()` and `plot_reconstruction()` provide quick diagnostics.
 
+## Validation
+
+The package includes a validation workflow built around a noise-free low-rank
+toy problem. The test suite checks exact recovery, benchmark-level agreement
+with `NMF::nmf()`, and convergence diagnostics through `loss`, `niter_run`,
+and `converged`.
+
 ## Installation
 
 ```r

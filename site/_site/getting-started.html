@@ -138,6 +138,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Reference</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./validation.html"> 
+<span class="menu-text">Validation</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./ifu-workflow.html"> 
 <span class="menu-text">IFU Workflow</span></a>
   </li>  
@@ -220,7 +224,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">basis</span>(fit)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>niter_run</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span>converged</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="plots" class="level2">
@@ -247,6 +253,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>fit$spatial</code> contains one abundance weight per spaxel and per component.</li>
 <li><code>fit$spectra</code> contains the recovered component spectra.</li>
 <li><code>fit$reconstruction</code> is the model approximation <code>A %*% S</code>.</li>
+<li><code>fit$loss</code> stores the optimization history used by <code>plot(fit, type = "loss")</code>.</li>
+<li><code>fit$niter_run</code> reports how many optimization steps were actually used.</li>
+<li><code>fit$converged</code> reports whether early stopping triggered before <code>niter</code>.</li>
 <li><code>fitted(fit, nx, ny)</code> and <code>predict(fit, type = "cube", nx, ny)</code> reshape that reconstruction back into a cube.</li>
 <li><code>residuals(fit, x = ...)</code> returns data minus reconstruction.</li>
 </ul>

@@ -12,6 +12,11 @@
   ny = NULL,
   lr = 0.05,
   niter = 500,
+  tol = 1e-06,
+  patience = 20,
+  init = c("least_squares", "random"),
+  nstart = 1,
+  seed = NULL,
   cuda = FALSE,
   verbose = FALSE,
   ...
@@ -32,6 +37,21 @@ or \code{"cube"}.}
 \item{lr}{Learning rate used when estimating abundance weights for new data.}
 
 \item{niter}{Number of optimization iterations for new data.}
+
+\item{tol}{Relative objective-improvement tolerance used for early stopping
+during prediction.}
+
+\item{patience}{Number of consecutive iterations with improvement below
+\code{tol} before prediction stops early.}
+
+\item{init}{Initialization scheme for abundance optimization when predicting
+new data. \code{"least_squares"} uses a clipped least-squares warm start.}
+
+\item{nstart}{Number of prediction restarts. The best solution by final
+objective value is returned.}
+
+\item{seed}{Optional integer seed used to make prediction restarts
+reproducible.}
 
 \item{cuda}{Logical; if \code{TRUE}, request CUDA execution.}
 

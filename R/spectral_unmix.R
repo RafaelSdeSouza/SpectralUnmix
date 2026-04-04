@@ -14,6 +14,13 @@
 #' @param k Number of components to estimate.
 #' @param lambda_smooth Non-negative weight for the first-difference smoothness
 #'   penalty applied to the recovered spectra.
+#' @param init Initialization scheme for the non-negative factors.
+#'   \code{"nndsvd"} usually gives a more stable starting point than
+#'   \code{"random"}.
+#' @param nstart Number of optimization restarts. The best solution by final
+#'   objective value is returned.
+#' @param seed Optional integer seed used to make restart generation
+#'   reproducible.
 #' @param lr Learning rate passed to \code{torch::optim_adam()}.
 #' @param niter Number of optimization iterations.
 #' @param tol Relative objective-improvement tolerance used for early stopping.
@@ -81,6 +88,9 @@
 spectral_unmix <- function(x,
                            k = 3,
                            lambda_smooth = 0.01,
+                           init = c("nndsvd", "random"),
+                           nstart = 1,
+                           seed = NULL,
                            lr = 0.02,
                            niter = 2000,
                            tol = 1e-6,
@@ -96,6 +106,7 @@ spectral_unmix <- function(x,
 
   input_metadata <- merge_metadata(extract_matrix_metadata(x), metadata)
   x <- validate_input_matrix(x)
+  init <- match.arg(init)
 
   if (!is.numeric(k) || length(k) != 1L || is.na(k) || k < 1L) {
     stop("'k' must be a positive integer.", call. = FALSE)
@@ -108,6 +119,13 @@ spectral_unmix <- function(x,
   if (!is.numeric(lambda_smooth) || length(lambda_smooth) != 1L || is.na(lambda_smooth) ||
       lambda_smooth < 0) {
     stop("'lambda_smooth' must be a non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(nstart) || length(nstart) != 1L || is.na(nstart) || nstart < 1) {
+    stop("'nstart' must be a positive integer.", call. = FALSE)
+  }
+  nstart <- as.integer(nstart)
+  if (!is.null(seed) && (!is.numeric(seed) || length(seed) != 1L || is.na(seed))) {
+    stop("'seed' must be NULL or a single integer.", call. = FALSE)
   }
   if (!is.numeric(lr) || length(lr) != 1L || is.na(lr) || lr <= 0) {
     stop("'lr' must be a positive number.", call. = FALSE)
@@ -140,9 +158,12 @@ spectral_unmix <- function(x,
   }
 
   device <- select_torch_device(cuda)
-  fit_core <- fit_spectral_unmix_adam(
+  fit_core <- fit_spectral_unmix_with_restarts(
     x = x,
     k = k,
+    init = init,
+    nstart = nstart,
+    seed = seed,
     lr = lr,
     niter = niter,
     tol = tol,
@@ -165,6 +186,11 @@ spectral_unmix <- function(x,
     reconstruction = reconstruction,
     fitted = reconstruction,
     loss = fit_core$loss,
+    init = init,
+    nstart = nstart,
+    seed = if (is.null(seed)) NULL else as.integer(seed),
+    restart_seed = fit_core$restart_seed,
+    restart_losses = fit_core$restart_losses,
     niter_run = fit_core$niter_run,
     converged = fit_core$converged,
     metadata = input_metadata,
@@ -447,10 +473,21 @@ demo_ifu_unmix <- function(k = 3, nx = 18, ny = 18, n_wave = 120, niter = 300, p
 
 #' @export
 print.spectral_unmix <- function(x, ...) {
+  niter_run <- if (!is.null(x$niter_run)) x$niter_run else length(x$loss)
+  converged <- isTRUE(x$converged)
+
   cat("<spectral_unmix>\n", sep = "")
   cat(sprintf("  spaxels: %d\n", nrow(x$spatial)))
   cat(sprintf("  wavelength channels: %d\n", ncol(x$spectra)))
   cat(sprintf("  components: %d\n", nrow(x$spectra)))
+  if (!is.null(x$init)) {
+    cat(sprintf("  init: %s\n", x$init))
+  }
+  if (!is.null(x$nstart)) {
+    cat(sprintf("  restarts: %d\n", x$nstart))
+  }
+  cat(sprintf("  iterations: %d\n", niter_run))
+  cat(sprintf("  converged: %s\n", if (converged) "yes" else "no"))
   cat(sprintf("  final loss: %.6f\n", utils::tail(x$loss, 1L)))
   invisible(x)
 }
@@ -500,7 +537,10 @@ summary.spectral_unmix <- function(object, ...) {
     n_wave = ncol(object$spectra),
     rank = nrow(object$spectra),
     final_loss = utils::tail(object$loss, 1L),
-    n_iter = length(object$loss)
+    n_iter = if (!is.null(object$niter_run)) object$niter_run else length(object$loss),
+    init = object$init,
+    nstart = object$nstart,
+    converged = isTRUE(object$converged)
   )
 
   class(summary_object) <- "summary.spectral_unmix"
@@ -513,7 +553,14 @@ print.summary.spectral_unmix <- function(x, ...) {
   cat(sprintf("  spaxels: %d\n", x$n_spaxels))
   cat(sprintf("  wavelength channels: %d\n", x$n_wave))
   cat(sprintf("  components: %d\n", x$rank))
+  if (!is.null(x$init)) {
+    cat(sprintf("  init: %s\n", x$init))
+  }
+  if (!is.null(x$nstart)) {
+    cat(sprintf("  restarts: %d\n", x$nstart))
+  }
   cat(sprintf("  iterations: %d\n", x$n_iter))
+  cat(sprintf("  converged: %s\n", if (isTRUE(x$converged)) "yes" else "no"))
   cat(sprintf("  final loss: %.6f\n", x$final_loss))
   invisible(x)
 }
@@ -646,6 +693,16 @@ residuals.spectral_unmix <- function(object, x, nx = NULL, ny = NULL, ...) {
 #' @param ny Optional y-axis size for cube output.
 #' @param lr Learning rate used when estimating abundance weights for new data.
 #' @param niter Number of optimization iterations for new data.
+#' @param tol Relative objective-improvement tolerance used for early stopping
+#'   during prediction.
+#' @param patience Number of consecutive iterations with improvement below
+#'   \code{tol} before prediction stops early.
+#' @param init Initialization scheme for abundance optimization when predicting
+#'   new data. \code{"least_squares"} uses a clipped least-squares warm start.
+#' @param nstart Number of prediction restarts. The best solution by final
+#'   objective value is returned.
+#' @param seed Optional integer seed used to make prediction restarts
+#'   reproducible.
 #' @param cuda Logical; if \code{TRUE}, request CUDA execution.
 #' @param verbose Logical; if \code{TRUE}, emit progress every 100 iterations.
 #' @param ... Unused.
@@ -666,6 +723,11 @@ predict.spectral_unmix <- function(object,
                                    ny = NULL,
                                    lr = 0.05,
                                    niter = 500,
+                                   tol = 1e-6,
+                                   patience = 20,
+                                   init = c("least_squares", "random"),
+                                   nstart = 1,
+                                   seed = NULL,
                                    cuda = FALSE,
                                    verbose = FALSE,
                                    ...) {
@@ -674,6 +736,7 @@ predict.spectral_unmix <- function(object,
   }
 
   type <- match.arg(type)
+  init <- match.arg(init)
 
   if (is.null(newdata)) {
     if (type == "spatial") {
@@ -711,27 +774,37 @@ predict.spectral_unmix <- function(object,
   if (!is.numeric(niter) || length(niter) != 1L || is.na(niter) || niter < 1L) {
     stop("'niter' must be a positive integer.", call. = FALSE)
   }
-
-  device <- select_torch_device(cuda)
-  X <- torch::torch_tensor(as.matrix(newdata), device = device)
-  S_fixed <- torch::torch_tensor(object$spectra, device = device)
-  A <- torch::torch_rand(nrow(newdata), nrow(object$spectra), device = device, requires_grad = TRUE)
-  opt <- torch::optim_adam(list(A), lr = lr)
-
-  for (i in seq_len(as.integer(niter))) {
-    opt$zero_grad()
-    Xhat <- A$matmul(S_fixed)
-    loss <- torch::torch_mean((X - Xhat)^2)
-    loss$backward()
-    opt$step()
-    A$data()$clamp_(min = 0)
-
-    if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
-      message(sprintf("Prediction iteration %d/%d, loss = %.6f", i, niter, as.numeric(loss$item())))
-    }
+  if (!is.numeric(tol) || length(tol) != 1L || is.na(tol) || tol < 0) {
+    stop("'tol' must be a non-negative number.", call. = FALSE)
+  }
+  if (!is.numeric(patience) || length(patience) != 1L || is.na(patience) || patience < 1L) {
+    stop("'patience' must be a positive integer.", call. = FALSE)
+  }
+  patience <- as.integer(patience)
+  if (!is.numeric(nstart) || length(nstart) != 1L || is.na(nstart) || nstart < 1L) {
+    stop("'nstart' must be a positive integer.", call. = FALSE)
+  }
+  nstart <- as.integer(nstart)
+  if (!is.null(seed) && (!is.numeric(seed) || length(seed) != 1L || is.na(seed))) {
+    stop("'seed' must be NULL or a single integer.", call. = FALSE)
   }
 
-  spatial <- as.matrix(A$detach()$cpu())
+  device <- select_torch_device(cuda)
+  fit_pred <- fit_spectral_unmix_prediction_with_restarts(
+    x = newdata,
+    spectra = object$spectra,
+    init = init,
+    nstart = nstart,
+    seed = seed,
+    lr = lr,
+    niter = as.integer(niter),
+    tol = tol,
+    patience = patience,
+    device = device,
+    verbose = verbose
+  )
+
+  spatial <- fit_pred$spatial
   reconstruction <- spatial %*% object$spectra
 
   if (type == "spatial") {
@@ -1019,8 +1092,159 @@ extract_cube_metadata <- function(x) {
   NULL
 }
 
+set_optimization_seed <- function(seed) {
+  if (is.null(seed)) {
+    return(invisible(NULL))
+  }
+
+  set.seed(as.integer(seed))
+  if (requireNamespace("torch", quietly = TRUE)) {
+    torch::torch_manual_seed(as.integer(seed))
+  }
+
+  invisible(NULL)
+}
+
+generate_restart_seeds <- function(nstart, seed = NULL) {
+  if (!is.null(seed)) {
+    set.seed(as.integer(seed))
+  }
+
+  as.integer(sample.int(.Machine$integer.max, nstart))
+}
+
+random_nmf_factors <- function(x, k, seed = NULL, eps = 1e-6) {
+  if (!is.null(seed)) {
+    set.seed(as.integer(seed))
+  }
+
+  x_pos <- pmax(as.matrix(x), 0)
+  scale_hint <- sqrt(max(mean(x_pos), eps) / max(k, 1L))
+  hi <- max(scale_hint, eps * 10)
+
+  list(
+    spatial = matrix(stats::runif(nrow(x_pos) * k, min = eps, max = hi), nrow = nrow(x_pos), ncol = k),
+    spectra = matrix(stats::runif(k * ncol(x_pos), min = eps, max = hi), nrow = k, ncol = ncol(x_pos))
+  )
+}
+
+initialize_nmf_factors <- function(x, k, init = c("nndsvd", "random"), seed = NULL, eps = 1e-6) {
+  init <- match.arg(init)
+
+  if (init == "random") {
+    return(random_nmf_factors(x, k, seed = seed, eps = eps))
+  }
+
+  x_pos <- pmax(as.matrix(x), 0)
+  if (!any(x_pos > 0)) {
+    return(random_nmf_factors(x, k, seed = seed, eps = eps))
+  }
+
+  rank_max <- min(dim(x_pos))
+  svd_fit <- base::svd(x_pos, nu = min(rank_max, k), nv = min(rank_max, k))
+  if (!length(svd_fit$d)) {
+    return(random_nmf_factors(x, k, seed = seed, eps = eps))
+  }
+
+  W <- matrix(0, nrow = nrow(x_pos), ncol = k)
+  H <- matrix(0, nrow = k, ncol = ncol(x_pos))
+
+  u1 <- abs(svd_fit$u[, 1L])
+  v1 <- abs(svd_fit$v[, 1L])
+  W[, 1L] <- sqrt(svd_fit$d[1L]) * u1
+  H[1L, ] <- sqrt(svd_fit$d[1L]) * v1
+
+  rank_used <- min(k, length(svd_fit$d))
+  if (rank_used >= 2L) {
+    for (j in 2:rank_used) {
+      uj <- svd_fit$u[, j]
+      vj <- svd_fit$v[, j]
+      up <- pmax(uj, 0)
+      un <- pmax(-uj, 0)
+      vp <- pmax(vj, 0)
+      vn <- pmax(-vj, 0)
+
+      up_norm <- sqrt(sum(up^2))
+      un_norm <- sqrt(sum(un^2))
+      vp_norm <- sqrt(sum(vp^2))
+      vn_norm <- sqrt(sum(vn^2))
+
+      pos_score <- up_norm * vp_norm
+      neg_score <- un_norm * vn_norm
+
+      if (pos_score >= neg_score && up_norm > 0 && vp_norm > 0) {
+        uvec <- up / up_norm
+        vvec <- vp / vp_norm
+        sigma <- pos_score
+      } else if (un_norm > 0 && vn_norm > 0) {
+        uvec <- un / un_norm
+        vvec <- vn / vn_norm
+        sigma <- neg_score
+      } else {
+        next
+      }
+
+      coef <- sqrt(max(svd_fit$d[j] * sigma, 0))
+      W[, j] <- coef * uvec
+      H[j, ] <- coef * vvec
+    }
+  }
+
+  fill <- max(mean(x_pos[x_pos > 0], na.rm = TRUE) * 1e-4, eps)
+  if (!is.finite(fill) || fill <= 0) {
+    fill <- eps
+  }
+  W[W <= 0] <- fill
+  H[H <= 0] <- fill
+
+  if (k > rank_used) {
+    rand_fill <- random_nmf_factors(x, k - rank_used, seed = seed, eps = fill)
+    W[, (rank_used + 1L):k] <- rand_fill$spatial
+    H[(rank_used + 1L):k, ] <- rand_fill$spectra
+  }
+
+  list(spatial = W, spectra = H)
+}
+
+fit_spectral_unmix_with_restarts <- function(x,
+                                             k,
+                                             init = c("nndsvd", "random"),
+                                             nstart = 1L,
+                                             seed = NULL,
+                                             ...) {
+  init <- match.arg(init)
+  restart_seeds <- generate_restart_seeds(nstart, seed = seed)
+  restart_losses <- numeric(nstart)
+  best_fit <- NULL
+  best_loss <- Inf
+
+  for (i in seq_len(nstart)) {
+    init_factors <- initialize_nmf_factors(x, k, init = init, seed = restart_seeds[i])
+    set_optimization_seed(restart_seeds[i])
+    fit <- fit_spectral_unmix_adam(
+      x = x,
+      k = k,
+      init_spatial = init_factors$spatial,
+      init_spectra = init_factors$spectra,
+      ...
+    )
+
+    restart_losses[i] <- utils::tail(fit$loss, 1L)
+    if (restart_losses[i] < best_loss) {
+      best_loss <- restart_losses[i]
+      best_fit <- fit
+      best_fit$restart_seed <- restart_seeds[i]
+    }
+  }
+
+  best_fit$restart_losses <- restart_losses
+  best_fit
+}
+
 fit_spectral_unmix_adam <- function(x,
                                     k,
+                                    init_spatial,
+                                    init_spectra,
                                     lr,
                                     niter,
                                     tol,
@@ -1029,14 +1253,16 @@ fit_spectral_unmix_adam <- function(x,
                                     device,
                                     verbose = FALSE) {
   X <- torch::torch_tensor(as.matrix(x), device = device)
-  n_spectra <- nrow(x)
   n_wave <- ncol(x)
-  A <- torch::torch_rand(n_spectra, k, device = device, requires_grad = TRUE)
-  S <- torch::torch_rand(k, n_wave, device = device, requires_grad = TRUE)
+  A <- torch::torch_tensor(as.matrix(init_spatial), device = device, requires_grad = TRUE)
+  S <- torch::torch_tensor(as.matrix(init_spectra), device = device, requires_grad = TRUE)
   opt <- torch::optim_adam(list(A, S), lr = lr)
   loss_history <- numeric(niter)
   stale_steps <- 0L
   converged <- FALSE
+  best_loss <- Inf
+  best_spatial <- NULL
+  best_spectra <- NULL
 
   for (i in seq_len(niter)) {
     opt$zero_grad()
@@ -1059,6 +1285,11 @@ fit_spectral_unmix_adam <- function(x,
     S$data()$clamp_(min = 0)
 
     loss_history[i] <- as.numeric(loss$item())
+    if (is.finite(loss_history[i]) && loss_history[i] < best_loss) {
+      best_loss <- loss_history[i]
+      best_spatial <- as.matrix(A$detach()$cpu())
+      best_spectra <- as.matrix(S$detach()$cpu())
+    }
     if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
       message(sprintf("Iteration %d/%d, loss = %.6f", i, niter, loss_history[i]))
     }
@@ -1078,8 +1309,13 @@ fit_spectral_unmix_adam <- function(x,
     }
   }
 
-  spatial <- as.matrix(A$detach()$cpu())
-  spectra <- as.matrix(S$detach()$cpu())
+  if (is.null(best_spatial) || is.null(best_spectra)) {
+    spatial <- as.matrix(A$detach()$cpu())
+    spectra <- as.matrix(S$detach()$cpu())
+  } else {
+    spatial <- best_spatial
+    spectra <- best_spectra
+  }
   reconstruction <- spatial %*% spectra
 
   list(
@@ -1090,6 +1326,152 @@ fit_spectral_unmix_adam <- function(x,
     niter_run = length(loss_history),
     converged = converged
   )
+}
+
+initialize_fixed_spectra_weights <- function(x,
+                                             spectra,
+                                             init = c("least_squares", "random"),
+                                             seed = NULL,
+                                             eps = 1e-8) {
+  init <- match.arg(init)
+
+  if (init == "random") {
+    if (!is.null(seed)) {
+      set.seed(as.integer(seed))
+    }
+    scale_hint <- sqrt(max(mean(pmax(x, 0)), eps) / max(nrow(spectra), 1L))
+    hi <- max(scale_hint, eps * 10)
+    return(matrix(
+      stats::runif(nrow(x) * nrow(spectra), min = eps, max = hi),
+      nrow = nrow(x),
+      ncol = nrow(spectra)
+    ))
+  }
+
+  gram <- spectra %*% t(spectra)
+  gram <- gram + diag(eps, nrow(gram))
+  init_weights <- x %*% t(spectra) %*% solve(gram)
+  init_weights <- pmax(init_weights, eps)
+
+  if (any(!is.finite(init_weights))) {
+    return(initialize_fixed_spectra_weights(x, spectra, init = "random", seed = seed, eps = eps))
+  }
+
+  init_weights
+}
+
+fit_spectral_unmix_prediction_adam <- function(x,
+                                               spectra,
+                                               init_spatial,
+                                               lr,
+                                               niter,
+                                               tol,
+                                               patience,
+                                               device,
+                                               verbose = FALSE) {
+  X <- torch::torch_tensor(as.matrix(x), device = device)
+  S_fixed <- torch::torch_tensor(as.matrix(spectra), device = device)
+  A <- torch::torch_tensor(as.matrix(init_spatial), device = device, requires_grad = TRUE)
+  opt <- torch::optim_adam(list(A), lr = lr)
+  loss_history <- numeric(niter)
+  stale_steps <- 0L
+  converged <- FALSE
+  best_loss <- Inf
+  best_spatial <- NULL
+
+  for (i in seq_len(niter)) {
+    opt$zero_grad()
+    Xhat <- A$matmul(S_fixed)
+    loss <- torch::torch_mean((X - Xhat)^2)
+    loss$backward()
+    opt$step()
+    A$data()$clamp_(min = 0)
+
+    loss_history[i] <- as.numeric(loss$item())
+    if (is.finite(loss_history[i]) && loss_history[i] < best_loss) {
+      best_loss <- loss_history[i]
+      best_spatial <- as.matrix(A$detach()$cpu())
+    }
+
+    if (verbose && (i %% 100L == 0L || i == 1L || i == niter)) {
+      message(sprintf("Prediction iteration %d/%d, loss = %.6f", i, niter, loss_history[i]))
+    }
+
+    if (i > 1L) {
+      rel_improvement <- (loss_history[i - 1L] - loss_history[i]) / max(loss_history[i - 1L], 1e-12)
+      if (!is.finite(rel_improvement) || rel_improvement <= tol) {
+        stale_steps <- stale_steps + 1L
+      } else {
+        stale_steps <- 0L
+      }
+      if (stale_steps >= patience) {
+        converged <- TRUE
+        loss_history <- loss_history[seq_len(i)]
+        break
+      }
+    }
+  }
+
+  if (is.null(best_spatial)) {
+    best_spatial <- as.matrix(A$detach()$cpu())
+  }
+
+  list(
+    spatial = best_spatial,
+    reconstruction = best_spatial %*% spectra,
+    loss = loss_history,
+    niter_run = length(loss_history),
+    converged = converged
+  )
+}
+
+fit_spectral_unmix_prediction_with_restarts <- function(x,
+                                                        spectra,
+                                                        init = c("least_squares", "random"),
+                                                        nstart = 1L,
+                                                        seed = NULL,
+                                                        lr,
+                                                        niter,
+                                                        tol,
+                                                        patience,
+                                                        device,
+                                                        verbose = FALSE) {
+  init <- match.arg(init)
+  restart_seeds <- generate_restart_seeds(nstart, seed = seed)
+  restart_losses <- numeric(nstart)
+  best_fit <- NULL
+  best_loss <- Inf
+
+  for (i in seq_len(nstart)) {
+    init_spatial <- initialize_fixed_spectra_weights(
+      x = x,
+      spectra = spectra,
+      init = init,
+      seed = restart_seeds[i]
+    )
+    set_optimization_seed(restart_seeds[i])
+    fit <- fit_spectral_unmix_prediction_adam(
+      x = x,
+      spectra = spectra,
+      init_spatial = init_spatial,
+      lr = lr,
+      niter = niter,
+      tol = tol,
+      patience = patience,
+      device = device,
+      verbose = verbose
+    )
+
+    restart_losses[i] <- utils::tail(fit$loss, 1L)
+    if (restart_losses[i] < best_loss) {
+      best_loss <- restart_losses[i]
+      best_fit <- fit
+      best_fit$restart_seed <- restart_seeds[i]
+    }
+  }
+
+  best_fit$restart_losses <- restart_losses
+  best_fit
 }
 
 extract_matrix_metadata <- function(x) {

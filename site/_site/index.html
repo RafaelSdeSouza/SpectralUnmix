@@ -170,6 +170,10 @@ window.Quarto = {
 <span class="menu-text">Reference</span></a>
   </li>  
   <li class="nav-item">
+    <a class="nav-link" href="./validation.html"> 
+<span class="menu-text">Validation</span></a>
+  </li>  
+  <li class="nav-item">
     <a class="nav-link" href="./ifu-workflow.html"> 
 <span class="menu-text">IFU Workflow</span></a>
   </li>  
@@ -201,6 +205,7 @@ window.Quarto = {
   <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation">Interpretation</a></li>
   <li><a href="#example-output" id="toc-example-output" class="nav-link" data-scroll-target="#example-output">Example output</a></li>
   <li><a href="#main-functions" id="toc-main-functions" class="nav-link" data-scroll-target="#main-functions">Main functions</a></li>
+  <li><a href="#validation" id="toc-validation" class="nav-link" data-scroll-target="#validation">Validation</a></li>
   <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
   </ul>
 </nav>
@@ -291,6 +296,10 @@ X \approx A S
 <li><code>fitted()</code>, <code>predict()</code>, and <code>residuals()</code> provide standard model methods.</li>
 <li><code>plot()</code> and <code>plot_reconstruction()</code> provide quick diagnostics.</li>
 </ul>
+</section>
+<section id="validation" class="level2">
+<h2 class="anchored" data-anchor-id="validation">Validation</h2>
+<p>The package includes a validation workflow built around a noise-free low-rank toy problem. The test suite checks exact recovery, benchmark-level agreement with <code>NMF::nmf()</code>, and convergence diagnostics through <code>loss</code>, <code>niter_run</code>, and <code>converged</code>.</p>
 </section>
 <section id="installation" class="level2">
 <h2 class="anchored" data-anchor-id="installation">Installation</h2>

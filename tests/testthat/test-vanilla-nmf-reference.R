@@ -52,6 +52,8 @@ reorder_fit <- function(fit, perm) {
   fit$spatial <- fit$spatial[, perm, drop = FALSE]
   fit$abundance <- fit$spatial
   fit$spectra <- fit$spectra[perm, , drop = FALSE]
+  fit$basis <- t(fit$spectra)
+  fit$coef <- t(fit$spatial)
   fit$reconstruction <- fit$spatial %*% fit$spectra
   fit$fitted <- fit$reconstruction
   fit
@@ -158,4 +160,61 @@ test_that("spectral_unmix is comparable to the NMF package on the same toy probl
 
   expect_lte(recon_su, recon_ref * 1.25 + 1e-6)
   expect_lte(spec_su, spec_ref * 2 + 1e-6)
+})
+
+test_that("spectral_unmix reports convergence diagnostics and supports early stopping", {
+  skip_if_not_installed("torch")
+
+  toy <- simulate_ifu_cube(nx = 8, ny = 8, n_wave = 60, noise = 0)
+
+  set_all_seeds(101)
+  fit_full <- spectral_unmix(
+    toy$matrix,
+    k = 3,
+    lambda_smooth = 0,
+    niter = 400,
+    lr = 0.03,
+    tol = 0,
+    patience = 400
+  )
+
+  set_all_seeds(101)
+  fit_early <- spectral_unmix(
+    toy$matrix,
+    k = 3,
+    lambda_smooth = 0,
+    niter = 400,
+    lr = 0.03,
+    tol = 1e-2,
+    patience = 5
+  )
+
+  expect_type(fit_early$loss, "double")
+  expect_identical(fit_early$niter_run, length(fit_early$loss))
+  expect_true(is.logical(fit_early$converged))
+  expect_true(fit_early$converged)
+  expect_lt(fit_early$niter_run, fit_full$niter_run)
+  expect_lt(utils::tail(fit_early$loss, 1L), fit_early$loss[1L])
+  expect_lt(mean((toy$matrix - fit_early$reconstruction)^2), 5e-4)
+})
+
+test_that("summary and print expose convergence information", {
+  fake <- list(
+    spatial = matrix(runif(12), 4, 3),
+    abundance = matrix(runif(12), 4, 3),
+    spectra = matrix(runif(15), 3, 5),
+    reconstruction = matrix(runif(20), 4, 5),
+    fitted = matrix(runif(20), 4, 5),
+    loss = c(3, 2, 1),
+    niter_run = 3L,
+    converged = TRUE
+  )
+  class(fake) <- "spectral_unmix"
+
+  smry <- summary(fake)
+
+  expect_identical(smry$n_iter, 3L)
+  expect_true(smry$converged)
+  expect_match(paste(capture.output(print(fake)), collapse = "\n"), "converged: yes")
+  expect_match(paste(capture.output(print(smry)), collapse = "\n"), "converged: yes")
 })

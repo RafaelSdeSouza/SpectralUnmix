@@ -44,6 +44,8 @@ fit <- spectral_unmix(
 
 print(fit)
 summary(fit)
+fit$converged
+fit$niter_run
 ```
 
 ## Accessors
@@ -68,6 +70,11 @@ residuals(fit, x = demo$matrix)
 # in-sample or new-data prediction
 predict(fit)
 predict(fit, newdata = demo$cube, type = "spatial")
+
+# convergence diagnostics
+fit$loss
+fit$niter_run
+fit$converged
 
 # metadata carried by the fit
 cube_metadata(fit)
@@ -140,6 +147,22 @@ fit_lib <- spectral_unmix(
   lr = 0.03
 )
 ```
+
+## Validation
+
+The test suite includes benchmark-style checks against `NMF::nmf()` on an
+exactly low-rank toy problem, plus convergence checks for early stopping and
+loss bookkeeping.
+
+```r
+devtools::test(filter = "vanilla-nmf")
+```
+
+The validation coverage currently checks:
+
+- exact low-rank recovery on a noise-free synthetic dataset
+- comparable reconstruction and spectral recovery to `NMF::nmf(method = "lee")`
+- convergence diagnostics through `loss`, `niter_run`, and `converged`
 
 ## Documentation
 

@@ -1,0 +1,54 @@
+---
+title: "Validation"
+---
+
+## Controlled benchmark
+
+`SpectralUnmix` is validated with a controlled low-rank benchmark that mirrors
+the basic NMF problem before any survey-specific complications are introduced.
+The synthetic data are exactly non-negative and exactly low-rank, so the test
+suite isolates the core factorization behavior of `spectral_unmix()`.
+
+## What is checked
+
+The package test suite currently verifies three things:
+
+- `spectral_unmix()` recovers a noise-free low-rank factorization with small
+  reconstruction and component-spectrum error.
+- `spectral_unmix()` is competitive with `NMF::nmf(method = "lee")` on the
+  same toy problem after matching fitted components to the reference ordering.
+- early stopping and convergence bookkeeping are exposed through `loss`,
+  `niter_run`, and `converged`.
+
+These checks live in:
+
+- `tests/testthat/test-vanilla-nmf-reference.R`
+
+## Why compare to `NMF`
+
+The `NMF` package is a natural baseline for the unregularized matrix
+factorization problem. Matching that reference behavior on a simple benchmark
+gives us confidence that the torch-based optimizer in `SpectralUnmix` is
+recovering the expected NMF structure before smoothness regularization or IFU
+data handling are layered on top.
+
+## Running the validation locally
+
+```r
+devtools::test(filter = "vanilla-nmf")
+```
+
+The benchmark tests require both `torch` and `NMF`. If either package is not
+available in the local R environment, the corresponding tests are skipped.
+
+## Interpreting the diagnostics
+
+- `fit$loss` is the optimization history.
+- `fit$niter_run` is the number of iterations actually executed.
+- `fit$converged` indicates whether early stopping triggered before the maximum
+  iteration budget.
+
+For practical work, the benchmark is intended as a sanity check. Good behavior
+here means the core factorization engine is behaving as expected; difficult
+real-data fits can then be investigated as modeling or preprocessing issues
+rather than as a basic failure of the package optimizer.

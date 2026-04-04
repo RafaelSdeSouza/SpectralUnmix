@@ -35,6 +35,97 @@
     "text": "Metadata and redshift\nWhen the input to cube_to_matrix() is a FITS-like list object, non-image entries are carried forward as metadata. That metadata can be recovered from the fitted object or reconstructed cube with cube_metadata().\n\nfit &lt;- spectral_unmix(Mat, k = 5, lr = 0.01, niter = 5000)\ncube_metadata(fit)\ncube_metadata(cube_hat)\n\nIf redshift information is stored in the FITS-side metadata, it will now be preserved as metadata and can be carried into fitted and reconstructed outputs."
   },
   {
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Getting Started",
+    "section": "",
+    "text": "library(SpectralUnmix)"
+  },
+  {
+    "objectID": "getting-started.html#simulated-example",
+    "href": "getting-started.html#simulated-example",
+    "title": "Getting Started",
+    "section": "Simulated example",
+    "text": "Simulated example\n\ndemo &lt;- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 3,\n  lambda_smooth = 0.02,\n  niter = 300,\n  lr = 0.03\n)"
+  },
+  {
+    "objectID": "getting-started.html#standard-interface",
+    "href": "getting-started.html#standard-interface",
+    "title": "Getting Started",
+    "section": "Standard interface",
+    "text": "Standard interface\n\nprint(fit)\nsummary(fit)\nbasis(fit)\ncoef(fit)\nfit$niter_run\nfit$converged"
+  },
+  {
+    "objectID": "getting-started.html#plots",
+    "href": "getting-started.html#plots",
+    "title": "Getting Started",
+    "section": "Plots",
+    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)\n\n\nExample figures\nComponent spectra:\n\nComponent maps:\n\nObserved versus reconstructed spectra:"
+  },
+  {
+    "objectID": "getting-started.html#what-the-outputs-mean",
+    "href": "getting-started.html#what-the-outputs-mean",
+    "title": "Getting Started",
+    "section": "What the outputs mean",
+    "text": "What the outputs mean\n\nfit$spatial contains one abundance weight per spaxel and per component.\nfit$spectra contains the recovered component spectra.\nfit$reconstruction is the model approximation A %*% S.\nfit$loss stores the optimization history used by plot(fit, type = \"loss\").\nfit$niter_run reports how many optimization steps were actually used.\nfit$converged reports whether early stopping triggered before niter.\nfitted(fit, nx, ny) and predict(fit, type = \"cube\", nx, ny) reshape that reconstruction back into a cube.\nresiduals(fit, x = ...) returns data minus reconstruction."
+  },
+  {
+    "objectID": "getting-started.html#real-library-example",
+    "href": "getting-started.html#real-library-example",
+    "title": "Getting Started",
+    "section": "Real library example",
+    "text": "Real library example\n\nreal_demo &lt;- coelho_demo_spectra()\ndim(real_demo$matrix)\n\n[1]    4 2250\n\nreal_demo$metadata\n\n           id                         file  teff logg feh\n1  cool_giant t03000_g-0.5_p00p00_sed.fits  3000 -0.5 0.0\n2 solar_dwarf t05750_g+4.5_p00p04_sed.fits  5750  4.5 0.0\n3      a_star t09000_g+4.5_p00p00_sed.fits  9000  4.5 0.0\n4    hot_star t18000_g+4.5_p02p00_sed.fits 18000  4.5 0.2\n\n\n\nfit_real &lt;- spectral_unmix(\n  real_demo$matrix,\n  k = 3,\n  lambda_smooth = 0.001,\n  niter = 400,\n  lr = 0.03\n)\n\nplot(fit_real, type = \"spectra\", wavelength = real_demo$wavelength)\nplot_reconstruction(\n  fit_real,\n  real_demo$matrix,\n  n = 4,\n  wavelength = real_demo$wavelength\n)\n\nStatic reconstruction view for the Coelho demo sample:"
+  },
+  {
+    "objectID": "getting-started.html#stellar-library-compression",
+    "href": "getting-started.html#stellar-library-compression",
+    "title": "Getting Started",
+    "section": "Stellar library compression",
+    "text": "Stellar library compression\n\nstellar_lib &lt;- coelho_stellar_subset()\ndim(stellar_lib$matrix)\n\n[1]  100 2250\n\ntable(stellar_lib$metadata$type)\n\n\n  a_f_star cool_dwarf cool_giant   hot_star solar_like \n        20         20         20         20         20 \n\n\n\nfit_lib &lt;- spectral_unmix(\n  stellar_lib$matrix,\n  k = 5,\n  lambda_smooth = 0.001,\n  niter = 500,\n  lr = 0.03\n)\n\nplot(fit_lib, type = \"spectra\", wavelength = stellar_lib$wavelength)\nplot_reconstruction(\n  fit_lib,\n  stellar_lib$matrix,\n  n = 6,\n  wavelength = stellar_lib$wavelength\n)"
+  },
+  {
+    "objectID": "reference.html",
+    "href": "reference.html",
+    "title": "Reference",
+    "section": "",
+    "text": "spectral_unmix()\nsummary()\nprint()\n\nThe fitted object also exposes optimization diagnostics through loss, niter_run, and converged."
+  },
+  {
+    "objectID": "reference.html#model-fitting",
+    "href": "reference.html#model-fitting",
+    "title": "Reference",
+    "section": "",
+    "text": "spectral_unmix()\nsummary()\nprint()\n\nThe fitted object also exposes optimization diagnostics through loss, niter_run, and converged."
+  },
+  {
+    "objectID": "reference.html#accessors",
+    "href": "reference.html#accessors",
+    "title": "Reference",
+    "section": "Accessors",
+    "text": "Accessors\n\nbasis()\ncoef()\nfitted()\npredict()\nresiduals()"
+  },
+  {
+    "objectID": "reference.html#cube-helpers",
+    "href": "reference.html#cube-helpers",
+    "title": "Reference",
+    "section": "Cube helpers",
+    "text": "Cube helpers\n\ncube_to_matrix()\nmatrix_to_cube()\ncomponent_map()\ncomponent_spectrum()\ncomponent_reconstruction()"
+  },
+  {
+    "objectID": "reference.html#visualization",
+    "href": "reference.html#visualization",
+    "title": "Reference",
+    "section": "Visualization",
+    "text": "Visualization\n\nplot()\nplot_reconstruction()"
+  },
+  {
+    "objectID": "reference.html#examples",
+    "href": "reference.html#examples",
+    "title": "Reference",
+    "section": "Examples",
+    "text": "Examples\n\nsimulate_ifu_cube()\ndemo_ifu_unmix()"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "SpectralUnmix",
@@ -77,6 +168,13 @@
     "text": "Main functions\n\nspectral_unmix() fits the model.\ncube_to_matrix() and matrix_to_cube() reshape IFU cubes.\nbasis() and coef() provide NMF-style accessors.\nfitted(), predict(), and residuals() provide standard model methods.\nplot() and plot_reconstruction() provide quick diagnostics."
   },
   {
+    "objectID": "index.html#validation",
+    "href": "index.html#validation",
+    "title": "SpectralUnmix",
+    "section": "Validation",
+    "text": "Validation\nThe package includes a validation workflow built around a noise-free low-rank toy problem. The test suite checks exact recovery, benchmark-level agreement with NMF::nmf(), and convergence diagnostics through loss, niter_run, and converged."
+  },
+  {
     "objectID": "index.html#installation",
     "href": "index.html#installation",
     "title": "SpectralUnmix",
@@ -84,94 +182,45 @@
     "text": "Installation\n# install.packages(\"remotes\")\nremotes::install_github(\"RafaelSdeSouza/SpectralUnmix\")\ntorch must be available in the local R installation."
   },
   {
-    "objectID": "reference.html",
-    "href": "reference.html",
-    "title": "Reference",
+    "objectID": "validation.html",
+    "href": "validation.html",
+    "title": "Validation",
     "section": "",
-    "text": "spectral_unmix()\nsummary()\nprint()"
+    "text": "SpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
   },
   {
-    "objectID": "reference.html#model-fitting",
-    "href": "reference.html#model-fitting",
-    "title": "Reference",
+    "objectID": "validation.html#controlled-benchmark",
+    "href": "validation.html#controlled-benchmark",
+    "title": "Validation",
     "section": "",
-    "text": "spectral_unmix()\nsummary()\nprint()"
+    "text": "SpectralUnmix is validated with a controlled low-rank benchmark that mirrors the basic NMF problem before any survey-specific complications are introduced. The synthetic data are exactly non-negative and exactly low-rank, so the test suite isolates the core factorization behavior of spectral_unmix()."
   },
   {
-    "objectID": "reference.html#accessors",
-    "href": "reference.html#accessors",
-    "title": "Reference",
-    "section": "Accessors",
-    "text": "Accessors\n\nbasis()\ncoef()\nfitted()\npredict()\nresiduals()"
+    "objectID": "validation.html#what-is-checked",
+    "href": "validation.html#what-is-checked",
+    "title": "Validation",
+    "section": "What is checked",
+    "text": "What is checked\nThe package test suite currently verifies three things:\n\nspectral_unmix() recovers a noise-free low-rank factorization with small reconstruction and component-spectrum error.\nspectral_unmix() is competitive with NMF::nmf(method = \"lee\") on the same toy problem after matching fitted components to the reference ordering.\nearly stopping and convergence bookkeeping are exposed through loss, niter_run, and converged.\n\nThese checks live in:\n\ntests/testthat/test-vanilla-nmf-reference.R"
   },
   {
-    "objectID": "reference.html#cube-helpers",
-    "href": "reference.html#cube-helpers",
-    "title": "Reference",
-    "section": "Cube helpers",
-    "text": "Cube helpers\n\ncube_to_matrix()\nmatrix_to_cube()\ncomponent_map()\ncomponent_spectrum()\ncomponent_reconstruction()"
+    "objectID": "validation.html#why-compare-to-nmf",
+    "href": "validation.html#why-compare-to-nmf",
+    "title": "Validation",
+    "section": "Why compare to NMF",
+    "text": "Why compare to NMF\nThe NMF package is a natural baseline for the unregularized matrix factorization problem. Matching that reference behavior on a simple benchmark gives us confidence that the torch-based optimizer in SpectralUnmix is recovering the expected NMF structure before smoothness regularization or IFU data handling are layered on top."
   },
   {
-    "objectID": "reference.html#visualization",
-    "href": "reference.html#visualization",
-    "title": "Reference",
-    "section": "Visualization",
-    "text": "Visualization\n\nplot()\nplot_reconstruction()"
+    "objectID": "validation.html#running-the-validation-locally",
+    "href": "validation.html#running-the-validation-locally",
+    "title": "Validation",
+    "section": "Running the validation locally",
+    "text": "Running the validation locally\ndevtools::test(filter = \"vanilla-nmf\")\nThe benchmark tests require both torch and NMF. If either package is not available in the local R environment, the corresponding tests are skipped."
   },
   {
-    "objectID": "reference.html#examples",
-    "href": "reference.html#examples",
-    "title": "Reference",
-    "section": "Examples",
-    "text": "Examples\n\nsimulate_ifu_cube()\ndemo_ifu_unmix()"
-  },
-  {
-    "objectID": "getting-started.html",
-    "href": "getting-started.html",
-    "title": "Getting Started",
-    "section": "",
-    "text": "library(SpectralUnmix)"
-  },
-  {
-    "objectID": "getting-started.html#simulated-example",
-    "href": "getting-started.html#simulated-example",
-    "title": "Getting Started",
-    "section": "Simulated example",
-    "text": "Simulated example\n\ndemo &lt;- simulate_ifu_cube(nx = 16, ny = 16, n_wave = 100)\nfit &lt;- spectral_unmix(\n  demo$matrix,\n  k = 3,\n  lambda_smooth = 0.02,\n  niter = 300,\n  lr = 0.03\n)"
-  },
-  {
-    "objectID": "getting-started.html#standard-interface",
-    "href": "getting-started.html#standard-interface",
-    "title": "Getting Started",
-    "section": "Standard interface",
-    "text": "Standard interface\n\nprint(fit)\nsummary(fit)\nbasis(fit)\ncoef(fit)"
-  },
-  {
-    "objectID": "getting-started.html#plots",
-    "href": "getting-started.html#plots",
-    "title": "Getting Started",
-    "section": "Plots",
-    "text": "Plots\n\nplot(fit, type = \"spectra\", wavelength = demo$wavelength)\nplot(fit, type = \"maps\", nx = demo$nx, ny = demo$ny)\nplot(fit, type = \"loss\")\nplot_reconstruction(fit, demo$matrix, n = 4, wavelength = demo$wavelength)\n\n\nExample figures\nComponent spectra:\n\nComponent maps:\n\nObserved versus reconstructed spectra:"
-  },
-  {
-    "objectID": "getting-started.html#what-the-outputs-mean",
-    "href": "getting-started.html#what-the-outputs-mean",
-    "title": "Getting Started",
-    "section": "What the outputs mean",
-    "text": "What the outputs mean\n\nfit$spatial contains one abundance weight per spaxel and per component.\nfit$spectra contains the recovered component spectra.\nfit$reconstruction is the model approximation A %*% S.\nfitted(fit, nx, ny) and predict(fit, type = \"cube\", nx, ny) reshape that reconstruction back into a cube.\nresiduals(fit, x = ...) returns data minus reconstruction."
-  },
-  {
-    "objectID": "getting-started.html#real-library-example",
-    "href": "getting-started.html#real-library-example",
-    "title": "Getting Started",
-    "section": "Real library example",
-    "text": "Real library example\n\nreal_demo &lt;- coelho_demo_spectra()\ndim(real_demo$matrix)\n\n[1]    4 2250\n\nreal_demo$metadata\n\n           id                         file  teff logg feh\n1  cool_giant t03000_g-0.5_p00p00_sed.fits  3000 -0.5 0.0\n2 solar_dwarf t05750_g+4.5_p00p04_sed.fits  5750  4.5 0.0\n3      a_star t09000_g+4.5_p00p00_sed.fits  9000  4.5 0.0\n4    hot_star t18000_g+4.5_p02p00_sed.fits 18000  4.5 0.2\n\n\n\nfit_real &lt;- spectral_unmix(\n  real_demo$matrix,\n  k = 3,\n  lambda_smooth = 0.001,\n  niter = 400,\n  lr = 0.03\n)\n\nplot(fit_real, type = \"spectra\", wavelength = real_demo$wavelength)\nplot_reconstruction(\n  fit_real,\n  real_demo$matrix,\n  n = 4,\n  wavelength = real_demo$wavelength\n)\n\nStatic reconstruction view for the Coelho demo sample:"
-  },
-  {
-    "objectID": "getting-started.html#stellar-library-compression",
-    "href": "getting-started.html#stellar-library-compression",
-    "title": "Getting Started",
-    "section": "Stellar library compression",
-    "text": "Stellar library compression\n\nstellar_lib &lt;- coelho_stellar_subset()\ndim(stellar_lib$matrix)\n\n[1]  100 2250\n\ntable(stellar_lib$metadata$type)\n\n\n  a_f_star cool_dwarf cool_giant   hot_star solar_like \n        20         20         20         20         20 \n\n\n\nfit_lib &lt;- spectral_unmix(\n  stellar_lib$matrix,\n  k = 5,\n  lambda_smooth = 0.001,\n  niter = 500,\n  lr = 0.03\n)\n\nplot(fit_lib, type = \"spectra\", wavelength = stellar_lib$wavelength)\nplot_reconstruction(\n  fit_lib,\n  stellar_lib$matrix,\n  n = 6,\n  wavelength = stellar_lib$wavelength\n)"
+    "objectID": "validation.html#interpreting-the-diagnostics",
+    "href": "validation.html#interpreting-the-diagnostics",
+    "title": "Validation",
+    "section": "Interpreting the diagnostics",
+    "text": "Interpreting the diagnostics\n\nfit$loss is the optimization history.\nfit$niter_run is the number of iterations actually executed.\nfit$converged indicates whether early stopping triggered before the maximum iteration budget.\n\nFor practical work, the benchmark is intended as a sanity check. Good behavior here means the core factorization engine is behaving as expected; difficult real-data fits can then be investigated as modeling or preprocessing issues rather than as a basic failure of the package optimizer."
   }
 ]
