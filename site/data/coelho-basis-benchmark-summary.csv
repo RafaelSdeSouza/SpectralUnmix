@@ -1,0 +1,3 @@
+"method","reconstruction_mse","basis_mse","iterations","converged"
+"SpectralUnmix",1.18155970616763e-06,0.00106659487916099,1500,FALSE
+"NMF",9.8153234519373e-07,2.6231067988283e-05,NA,NA
