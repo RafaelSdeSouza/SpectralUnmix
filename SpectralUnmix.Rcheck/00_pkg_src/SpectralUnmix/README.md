@@ -14,6 +14,10 @@ $$
 where `X` is a spaxel-by-wavelength matrix, `A` contains spatial abundances,
 and `S` contains component spectra.
 
+Each spaxel spectrum is represented as a non-negative combination of shared
+component spectra. The abundances vary across the field, while the component
+spectra are global to the fit.
+
 ## Installation
 
 ```r
@@ -40,6 +44,8 @@ fit <- spectral_unmix(
 
 print(fit)
 summary(fit)
+fit$converged
+fit$niter_run
 ```
 
 ## Accessors
@@ -64,6 +70,14 @@ residuals(fit, x = demo$matrix)
 # in-sample or new-data prediction
 predict(fit)
 predict(fit, newdata = demo$cube, type = "spatial")
+
+# convergence diagnostics
+fit$loss
+fit$niter_run
+fit$converged
+
+# metadata carried by the fit
+cube_metadata(fit)
 ```
 
 ## Visualization
@@ -94,9 +108,64 @@ cube_hat <- predict(
   nx = dim(X$imDat)[1],
   ny = dim(X$imDat)[2]
 )
+
+# recover stored FITS-side metadata such as headers or redshift if present
+meta <- cube_metadata(cube_hat)
 ```
+
+When `cube_to_matrix()` receives a FITS-like list object, it now carries
+non-image entries such as headers and other metadata through the matrix, the
+fitted object, and reconstructed cubes.
+
+## Real spectra demo
+
+```r
+real_demo <- coelho_demo_spectra()
+dim(real_demo$matrix)
+
+fit_real <- spectral_unmix(
+  real_demo$matrix,
+  k = 3,
+  lambda_smooth = 0.001,
+  niter = 400,
+  lr = 0.03
+)
+```
+
+## Stellar library subset
+
+```r
+stellar_lib <- coelho_stellar_subset()
+dim(stellar_lib$matrix)
+table(stellar_lib$metadata$type)
+
+fit_lib <- spectral_unmix(
+  stellar_lib$matrix,
+  k = 5,
+  lambda_smooth = 0.001,
+  niter = 500,
+  lr = 0.03
+)
+```
+
+## Validation
+
+The test suite includes benchmark-style checks against `NMF::nmf()` on an
+exactly low-rank toy problem, plus convergence checks for early stopping and
+loss bookkeeping.
+
+```r
+devtools::test(filter = "vanilla-nmf")
+```
+
+The validation coverage currently checks:
+
+- exact low-rank recovery on a noise-free synthetic dataset
+- comparable reconstruction and spectral recovery to `NMF::nmf(method = "lee")`
+- convergence diagnostics through `loss`, `niter_run`, and `converged`
 
 ## Documentation
 
-Package articles are provided in the `vignettes/` directory. A Quarto website
-is provided in `site/`.
+Package articles are provided in the `vignettes/` directory.
+
+Website: [https://rafaelsdesouza.github.io/SpectralUnmix/](https://rafaelsdesouza.github.io/SpectralUnmix/)

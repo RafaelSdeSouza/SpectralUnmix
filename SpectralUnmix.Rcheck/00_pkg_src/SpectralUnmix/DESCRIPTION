@@ -16,16 +16,17 @@ Description: SpectralUnmix provides tools for spectral–spatial decomposition o
     into spatial abundance maps and spectral components.
     Optional spectral regularization can be applied to encourage smooth
     physically meaningful spectra.
-License: GPL-3 + file LICENSE
+License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: torch
-Suggests: knitr, rmarkdown, viridis, ggplot2
+Suggests: NMF, knitr, rmarkdown, testthat, viridis, ggplot2
 VignetteBuilder: knitr
 URL: https://github.com/RafaelSdeSouza/SpectralUnmix
 BugReports: https://github.com/RafaelSdeSouza/SpectralUnmix/issues
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-03-08 13:35:25 UTC; rd23aag
+Packaged: 2026-05-20 02:00:47 UTC; rd23aag
 Author: Rafael S. de Souza [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-7207-4584>)
 Maintainer: Rafael S. de Souza <r.s.desouza@herts.ac.uk>
+Depends: R (>= 3.5.0)

@@ -1,9 +1,32 @@
+basis                   NMF-style Basis Matrix
 basis                   Standard Model Methods for SpectralUnmix Fits
+coef.spectral_unmix     Extract Abundance Coefficients
+coelho_demo_spectra     Demo Stellar Spectra Extracted From the Coelho
+                        Library
+coelho_stellar_subset   Curated Stellar Library Subset for NMF Demos
+component_map           Extract a Component Map
+component_reconstruction
+                        Reconstruct a Single Component
+component_spectrum      Extract a Component Spectrum
+cube_metadata           Return Stored Metadata
 cube_to_matrix          Helpers for Cube Reshaping and Map Extraction
+cube_to_matrix          Reshape a Spectral Cube Into a Matrix
+demo_ifu_unmix          Run the Built-in IFU Demonstration
+fitted.spectral_unmix   Return the Fitted Reconstruction
+matrix_to_cube          Reshape a Matrix Back Into a Cube
+plot_reconstruction     Plot Data Versus Reconstruction
+plot.spectral_unmix     Plot a Spectral Unmixing Result
 plot.spectral_unmix     Visualization Helpers for Spectral Unmixing
                         Results
+predict.spectral_unmix
+                        Predict From a Fitted Spectral Unmixing Model
+residuals.spectral_unmix
+                        Compute Residuals
 simulate_ifu_cube       Synthetic IFU Demos
+simulate_ifu_cube       Simulate a Small IFU-like Cube
 spectral_unmix          Spectral Unmixing for Hyperspectral and IFU
                         Data
 SpectralUnmix           SpectralUnmix: Spectral Unmixing for
                         Hyperspectral and IFU Data
+summary.spectral_unmix
+                        Summarize a Spectral Unmixing Fit

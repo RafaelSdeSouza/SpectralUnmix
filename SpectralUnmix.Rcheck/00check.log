@@ -16,18 +16,25 @@
 * checking if this is a source package ... OK
 * checking if there is a namespace ... OK
 * checking for executable files ... OK
-* checking for hidden files and directories ... OK
+* checking for hidden files and directories ... NOTE
+Found the following hidden files and directories:
+  .zenodo.json
+These were most likely included in error. See section ‘Package
+structure’ in the ‘Writing R Extensions’ manual.
 * checking for portable file names ... OK
 * checking for sufficient/correct file permissions ... OK
 * checking whether package ‘SpectralUnmix’ can be installed ... OK
 * checking installed package size ... OK
 * checking package directory ... OK
-* checking ‘build’ directory ... OK
-* checking DESCRIPTION meta-information ... OK
+* checking DESCRIPTION meta-information ... NOTE
+License stub is invalid DCF.
 * checking top-level files ... OK
 * checking for left-over files ... OK
 * checking index information ... OK
-* checking package subdirectories ... OK
+* checking package subdirectories ... NOTE
+Found the following CITATION file in a non-standard place:
+  CITATION.cff
+Most likely ‘inst/CITATION’ should be used instead.
 * checking code files for non-ASCII characters ... OK
 * checking R files for syntax errors ... OK
 * checking whether the package can be loaded ... OK
@@ -41,18 +48,100 @@
 * checking foreign function calls ... OK
 * checking R code for possible problems ... OK
 * checking Rd files ... OK
-* checking Rd metadata ... OK
+* checking Rd metadata ... WARNING
+Rd files with duplicated name 'basis':
+  ‘basis.Rd’ ‘model_methods.Rd’
+Rd files with duplicated name 'cube_to_matrix':
+  ‘cube_helpers.Rd’ ‘cube_to_matrix.Rd’
+Rd files with duplicated name 'plot.spectral_unmix':
+  ‘plot.spectral_unmix.Rd’ ‘visualization.Rd’
+Rd files with duplicated name 'simulate_ifu_cube':
+  ‘demos.Rd’ ‘simulate_ifu_cube.Rd’
+Rd files with duplicated alias 'basis':
+  ‘basis.Rd’ ‘model_methods.Rd’
+Rd files with duplicated alias 'coef.spectral_unmix':
+  ‘coef.spectral_unmix.Rd’ ‘model_methods.Rd’
+Rd files with duplicated alias 'component_map':
+  ‘component_map.Rd’ ‘cube_helpers.Rd’
+Rd files with duplicated alias 'component_reconstruction':
+  ‘component_reconstruction.Rd’ ‘cube_helpers.Rd’
+Rd files with duplicated alias 'component_spectrum':
+  ‘component_spectrum.Rd’ ‘cube_helpers.Rd’
+Rd files with duplicated alias 'cube_metadata':
+  ‘cube_helpers.Rd’ ‘cube_metadata.Rd’
+Rd files with duplicated alias 'cube_to_matrix':
+  ‘cube_helpers.Rd’ ‘cube_to_matrix.Rd’
+Rd files with duplicated alias 'demo_ifu_unmix':
+  ‘demo_ifu_unmix.Rd’ ‘demos.Rd’
+Rd files with duplicated alias 'fitted.spectral_unmix':
+  ‘fitted.spectral_unmix.Rd’ ‘model_methods.Rd’
+Rd files with duplicated alias 'matrix_to_cube':
+  ‘cube_helpers.Rd’ ‘matrix_to_cube.Rd’
+Rd files with duplicated alias 'plot_reconstruction':
+  ‘plot_reconstruction.Rd’ ‘visualization.Rd’
+Rd files with duplicated alias 'plot.spectral_unmix':
+  ‘plot.spectral_unmix.Rd’ ‘visualization.Rd’
+Rd files with duplicated alias 'predict.spectral_unmix':
+  ‘model_methods.Rd’ ‘predict.spectral_unmix.Rd’
+Rd files with duplicated alias 'residuals.spectral_unmix':
+  ‘model_methods.Rd’ ‘residuals.spectral_unmix.Rd’
+Rd files with duplicated alias 'simulate_ifu_cube':
+  ‘demos.Rd’ ‘simulate_ifu_cube.Rd’
+Rd files with duplicated alias 'summary.spectral_unmix':
+  ‘model_methods.Rd’ ‘summary.spectral_unmix.Rd’
 * checking Rd cross-references ... OK
 * checking for missing documentation entries ... OK
-* checking for code/documentation mismatches ... OK
+* checking for code/documentation mismatches ... WARNING
+Codoc mismatches from Rd file 'model_methods.Rd':
+predict.spectral_unmix
+  Code: function(object, newdata = NULL, type = c("reconstruction",
+                 "spatial", "cube"), nx = NULL, ny = NULL, lr = 0.05,
+                 niter = 500, tol = 1e-06, patience = 20, init =
+                 c("least_squares", "random"), nstart = 1, seed = NULL,
+                 cuda = FALSE, verbose = FALSE, ...)
+  Docs: function(object, newdata = NULL, type = c("reconstruction",
+                 "spatial", "cube"), nx = NULL, ny = NULL, lr = 0.05,
+                 niter = 500, cuda = FALSE, verbose = FALSE, ...)
+  Argument names in code not in docs:
+    tol patience init nstart seed
+  Mismatches in argument names:
+    Position: 8 Code: tol Docs: cuda
+    Position: 9 Code: patience Docs: verbose
+    Position: 10 Code: init Docs: ...
+
+Codoc mismatches from Rd file 'spectral_unmix.Rd':
+spectral_unmix
+  Code: function(x, k = 3, lambda_smooth = 0.01, init = c("nndsvd",
+                 "random"), nstart = 1, seed = NULL, lr = 0.02, niter =
+                 2000, tol = 1e-06, patience = 20, center = FALSE,
+                 scale = FALSE, cuda = FALSE, verbose = FALSE, metadata
+                 = NULL)
+  Docs: function(x, k = 3, lambda_smooth = 0.01, lr = 0.02, niter =
+                 2000, center = FALSE, scale = FALSE, cuda = FALSE,
+                 verbose = FALSE, metadata = NULL)
+  Argument names in code not in docs:
+    init nstart seed tol patience
+  Mismatches in argument names (first 3):
+    Position: 4 Code: init Docs: lr
+    Position: 5 Code: nstart Docs: niter
+    Position: 6 Code: seed Docs: center
+
 * checking Rd \usage sections ... OK
 * checking Rd contents ... OK
 * checking for unstated dependencies in examples ... OK
-* checking installed files from ‘inst/doc’ ... OK
-* checking files in ‘vignettes’ ... OK
+* checking files in ‘vignettes’ ... WARNING
+Files in the 'vignettes' directory but no files in 'inst/doc':
+  ‘getting-started.Rmd’ ‘ifu-workflow.Rmd’
 * checking examples ... OK
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... OK
+  Running ‘testthat.R’
 * checking for unstated dependencies in vignettes ... OK
-* checking package vignettes ... OK
+* checking package vignettes ... WARNING
+Directory 'inst/doc' does not exist.
+Package vignettes without corresponding single PDF/HTML:
+  ‘getting-started.Rmd’
+  ‘ifu-workflow.Rmd’
 * checking re-building of vignette outputs ... OK
 * DONE
-Status: OK
+Status: 4 WARNINGs, 3 NOTEs
